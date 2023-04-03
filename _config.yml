@@ -19,7 +19,7 @@ locale                   : "ko-KR"
 title                    : "DATA_Study"
 title_separator          : "-"
 subtitle                 : # site tagline that appears below site title in masthead
-name                     : "Your Name"
+name                     : "Kim Jin"
 description              : "An amazing website."
 url                      : "https://kimjin1022.github.io"
 baseurl                  : # the subpath of your site, e.g. "/blog"
@@ -107,7 +107,7 @@ author:
   name             : "Your Name"
   avatar           : # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
   bio              : "I am an **amazing** person."
-  location         : "Somewhere"
+  location         : "Wauri, Hwaseong-si, Gyeonggi-do, Republic of Korea"
   email            :
   links:
     - label: "Email"
