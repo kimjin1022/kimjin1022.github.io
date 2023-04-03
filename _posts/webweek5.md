@@ -1,0 +1,6513 @@
+```python
+from bs4 import BeautifulSoup
+import requests as rq
+import pandas as pd
+import numpy as np
+import re
+```
+
+
+```python
+url = rq.get("http://www.statiz.co.kr/stat.php?mid=stat&re=0&ys=1982&ye=2018&sn=100&pa=0")
+
+soup = BeautifulSoup(url.content,'lxml')
+```
+
+
+```python
+table = soup.find('table',{'id':"mytable"})
+```
+
+
+```python
+temp = [i.text for i in table.find_all('tr')]
+```
+
+
+```python
+temp = pd.Series(temp)
+```
+
+
+```python
+temp
+```
+
+
+
+
+    0      \n순\n이름\n팀\n정렬G타석타수득점안타2타3타홈런루타타점도루도실볼넷사구고4삼진병...
+    1                                \nWAR*타율출루장타OPSwOBAwRC+
+    2      1이종범94해SS 11.77  124  561  499  113  196  27  ...
+    3      2테임즈15N1B 10.71  142  595  472  130  180  42  ...
+    4      3심정수03현RF 10.19  133  601  460  110  154  16  ...
+                                 ...                        
+    115    96장종훈95한1B 6.14  126  498  420  77  137  25  4...
+    116    97이종범93해SS 6.14  126  525  475  85  133  16  4...
+    117    98김태균08한1B 6.14  115  484  410  81  133  27  1...
+    118    99김동주02두3B 6.13  120  487  415  63  132  21  0...
+    119    100우즈00두1B 6.12  127  565  479  91  151  22  0...
+    Length: 120, dtype: object
+
+
+
+
+```python
+temp = temp[~temp.str.match("[\n]")].reset_index(drop=True) 
+```
+
+
+```python
+temp
+```
+
+
+
+
+    0     1이종범94해SS 11.77  124  561  499  113  196  27  ...
+    1     2테임즈15N1B 10.71  142  595  472  130  180  42  ...
+    2     3심정수03현RF 10.19  133  601  460  110  154  16  ...
+    3     4이종범97해SS 9.70  125  577  484  112  157  28  3...
+    4     5이종범96해SS 9.52  113  525  449  94  149  28  1 ...
+                                ...                        
+    95    96장종훈95한1B 6.14  126  498  420  77  137  25  4...
+    96    97이종범93해SS 6.14  126  525  475  85  133  16  4...
+    97    98김태균08한1B 6.14  115  484  410  81  133  27  1...
+    98    99김동주02두3B 6.13  120  487  415  63  132  21  0...
+    99    100우즈00두1B 6.12  127  565  479  91  151  22  0...
+    Length: 100, dtype: object
+
+
+
+
+```python
+temp = temp.apply(lambda x: pd.Series(x.split(' ')))
+```
+
+
+```python
+temp
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>0</th>
+      <th>1</th>
+      <th>2</th>
+      <th>3</th>
+      <th>4</th>
+      <th>5</th>
+      <th>6</th>
+      <th>7</th>
+      <th>8</th>
+      <th>9</th>
+      <th>...</th>
+      <th>45</th>
+      <th>46</th>
+      <th>47</th>
+      <th>48</th>
+      <th>49</th>
+      <th>50</th>
+      <th>51</th>
+      <th>52</th>
+      <th>53</th>
+      <th>54</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1이종범94해SS</td>
+      <td>11.77</td>
+      <td></td>
+      <td>124</td>
+      <td></td>
+      <td>561</td>
+      <td></td>
+      <td>499</td>
+      <td></td>
+      <td>113</td>
+      <td>...</td>
+      <td>.581</td>
+      <td></td>
+      <td>1.033</td>
+      <td></td>
+      <td>.462</td>
+      <td></td>
+      <td>198.3</td>
+      <td></td>
+      <td>11.77</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2테임즈15N1B</td>
+      <td>10.71</td>
+      <td></td>
+      <td>142</td>
+      <td></td>
+      <td>595</td>
+      <td></td>
+      <td>472</td>
+      <td></td>
+      <td>130</td>
+      <td>...</td>
+      <td>.790</td>
+      <td></td>
+      <td>1.288</td>
+      <td></td>
+      <td>.530</td>
+      <td></td>
+      <td>222.3</td>
+      <td></td>
+      <td>10.71</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3심정수03현RF</td>
+      <td>10.19</td>
+      <td></td>
+      <td>133</td>
+      <td></td>
+      <td>601</td>
+      <td></td>
+      <td>460</td>
+      <td></td>
+      <td>110</td>
+      <td>...</td>
+      <td>.720</td>
+      <td></td>
+      <td>1.197</td>
+      <td></td>
+      <td>.498</td>
+      <td></td>
+      <td>210.7</td>
+      <td></td>
+      <td>10.19</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>4이종범97해SS</td>
+      <td>9.70</td>
+      <td></td>
+      <td>125</td>
+      <td></td>
+      <td>577</td>
+      <td></td>
+      <td>484</td>
+      <td></td>
+      <td>112</td>
+      <td>...</td>
+      <td>.581</td>
+      <td></td>
+      <td>1.009</td>
+      <td></td>
+      <td>.431</td>
+      <td></td>
+      <td>173.2</td>
+      <td></td>
+      <td>9.70</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>5이종범96해SS</td>
+      <td>9.52</td>
+      <td></td>
+      <td>113</td>
+      <td></td>
+      <td>525</td>
+      <td></td>
+      <td>449</td>
+      <td></td>
+      <td>94</td>
+      <td>...</td>
+      <td>.566</td>
+      <td></td>
+      <td>.991</td>
+      <td></td>
+      <td>.440</td>
+      <td></td>
+      <td>184.6</td>
+      <td></td>
+      <td>9.52</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>95</th>
+      <td>96장종훈95한1B</td>
+      <td>6.14</td>
+      <td></td>
+      <td>126</td>
+      <td></td>
+      <td>498</td>
+      <td></td>
+      <td>420</td>
+      <td></td>
+      <td>77</td>
+      <td>...</td>
+      <td>.562</td>
+      <td></td>
+      <td>.986</td>
+      <td></td>
+      <td>.431</td>
+      <td></td>
+      <td>183.1</td>
+      <td></td>
+      <td>6.14</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>96</th>
+      <td>97이종범93해SS</td>
+      <td>6.14</td>
+      <td></td>
+      <td>126</td>
+      <td></td>
+      <td>525</td>
+      <td></td>
+      <td>475</td>
+      <td></td>
+      <td>85</td>
+      <td>...</td>
+      <td>.432</td>
+      <td></td>
+      <td>.762</td>
+      <td></td>
+      <td>.350</td>
+      <td></td>
+      <td>127.4</td>
+      <td></td>
+      <td>6.14</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>97</th>
+      <td>98김태균08한1B</td>
+      <td>6.14</td>
+      <td></td>
+      <td>115</td>
+      <td></td>
+      <td>484</td>
+      <td></td>
+      <td>410</td>
+      <td></td>
+      <td>81</td>
+      <td>...</td>
+      <td>.622</td>
+      <td></td>
+      <td>1.039</td>
+      <td></td>
+      <td>.461</td>
+      <td></td>
+      <td>183.4</td>
+      <td></td>
+      <td>6.14</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>98</th>
+      <td>99김동주02두3B</td>
+      <td>6.13</td>
+      <td></td>
+      <td>120</td>
+      <td></td>
+      <td>487</td>
+      <td></td>
+      <td>415</td>
+      <td></td>
+      <td>63</td>
+      <td>...</td>
+      <td>.557</td>
+      <td></td>
+      <td>.961</td>
+      <td></td>
+      <td>.415</td>
+      <td></td>
+      <td>162.7</td>
+      <td></td>
+      <td>6.13</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>99</th>
+      <td>100우즈00두1B</td>
+      <td>6.12</td>
+      <td></td>
+      <td>127</td>
+      <td></td>
+      <td>565</td>
+      <td></td>
+      <td>479</td>
+      <td></td>
+      <td>91</td>
+      <td>...</td>
+      <td>.605</td>
+      <td></td>
+      <td>1.020</td>
+      <td></td>
+      <td>.437</td>
+      <td></td>
+      <td>166.6</td>
+      <td></td>
+      <td>6.12</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+<p>100 rows × 55 columns</p>
+</div>
+
+
+
+
+```python
+temp = temp.replace('', np.nan)
+```
+
+
+```python
+temp
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>0</th>
+      <th>1</th>
+      <th>2</th>
+      <th>3</th>
+      <th>4</th>
+      <th>5</th>
+      <th>6</th>
+      <th>7</th>
+      <th>8</th>
+      <th>9</th>
+      <th>...</th>
+      <th>45</th>
+      <th>46</th>
+      <th>47</th>
+      <th>48</th>
+      <th>49</th>
+      <th>50</th>
+      <th>51</th>
+      <th>52</th>
+      <th>53</th>
+      <th>54</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1이종범94해SS</td>
+      <td>11.77</td>
+      <td>NaN</td>
+      <td>124</td>
+      <td>NaN</td>
+      <td>561</td>
+      <td>NaN</td>
+      <td>499</td>
+      <td>NaN</td>
+      <td>113</td>
+      <td>...</td>
+      <td>.581</td>
+      <td>NaN</td>
+      <td>1.033</td>
+      <td>NaN</td>
+      <td>.462</td>
+      <td>NaN</td>
+      <td>198.3</td>
+      <td>NaN</td>
+      <td>11.77</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2테임즈15N1B</td>
+      <td>10.71</td>
+      <td>NaN</td>
+      <td>142</td>
+      <td>NaN</td>
+      <td>595</td>
+      <td>NaN</td>
+      <td>472</td>
+      <td>NaN</td>
+      <td>130</td>
+      <td>...</td>
+      <td>.790</td>
+      <td>NaN</td>
+      <td>1.288</td>
+      <td>NaN</td>
+      <td>.530</td>
+      <td>NaN</td>
+      <td>222.3</td>
+      <td>NaN</td>
+      <td>10.71</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3심정수03현RF</td>
+      <td>10.19</td>
+      <td>NaN</td>
+      <td>133</td>
+      <td>NaN</td>
+      <td>601</td>
+      <td>NaN</td>
+      <td>460</td>
+      <td>NaN</td>
+      <td>110</td>
+      <td>...</td>
+      <td>.720</td>
+      <td>NaN</td>
+      <td>1.197</td>
+      <td>NaN</td>
+      <td>.498</td>
+      <td>NaN</td>
+      <td>210.7</td>
+      <td>NaN</td>
+      <td>10.19</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>4이종범97해SS</td>
+      <td>9.70</td>
+      <td>NaN</td>
+      <td>125</td>
+      <td>NaN</td>
+      <td>577</td>
+      <td>NaN</td>
+      <td>484</td>
+      <td>NaN</td>
+      <td>112</td>
+      <td>...</td>
+      <td>.581</td>
+      <td>NaN</td>
+      <td>1.009</td>
+      <td>NaN</td>
+      <td>.431</td>
+      <td>NaN</td>
+      <td>173.2</td>
+      <td>NaN</td>
+      <td>9.70</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>5이종범96해SS</td>
+      <td>9.52</td>
+      <td>NaN</td>
+      <td>113</td>
+      <td>NaN</td>
+      <td>525</td>
+      <td>NaN</td>
+      <td>449</td>
+      <td>NaN</td>
+      <td>94</td>
+      <td>...</td>
+      <td>.566</td>
+      <td>NaN</td>
+      <td>.991</td>
+      <td>NaN</td>
+      <td>.440</td>
+      <td>NaN</td>
+      <td>184.6</td>
+      <td>NaN</td>
+      <td>9.52</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>95</th>
+      <td>96장종훈95한1B</td>
+      <td>6.14</td>
+      <td>NaN</td>
+      <td>126</td>
+      <td>NaN</td>
+      <td>498</td>
+      <td>NaN</td>
+      <td>420</td>
+      <td>NaN</td>
+      <td>77</td>
+      <td>...</td>
+      <td>.562</td>
+      <td>NaN</td>
+      <td>.986</td>
+      <td>NaN</td>
+      <td>.431</td>
+      <td>NaN</td>
+      <td>183.1</td>
+      <td>NaN</td>
+      <td>6.14</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>96</th>
+      <td>97이종범93해SS</td>
+      <td>6.14</td>
+      <td>NaN</td>
+      <td>126</td>
+      <td>NaN</td>
+      <td>525</td>
+      <td>NaN</td>
+      <td>475</td>
+      <td>NaN</td>
+      <td>85</td>
+      <td>...</td>
+      <td>.432</td>
+      <td>NaN</td>
+      <td>.762</td>
+      <td>NaN</td>
+      <td>.350</td>
+      <td>NaN</td>
+      <td>127.4</td>
+      <td>NaN</td>
+      <td>6.14</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>97</th>
+      <td>98김태균08한1B</td>
+      <td>6.14</td>
+      <td>NaN</td>
+      <td>115</td>
+      <td>NaN</td>
+      <td>484</td>
+      <td>NaN</td>
+      <td>410</td>
+      <td>NaN</td>
+      <td>81</td>
+      <td>...</td>
+      <td>.622</td>
+      <td>NaN</td>
+      <td>1.039</td>
+      <td>NaN</td>
+      <td>.461</td>
+      <td>NaN</td>
+      <td>183.4</td>
+      <td>NaN</td>
+      <td>6.14</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>98</th>
+      <td>99김동주02두3B</td>
+      <td>6.13</td>
+      <td>NaN</td>
+      <td>120</td>
+      <td>NaN</td>
+      <td>487</td>
+      <td>NaN</td>
+      <td>415</td>
+      <td>NaN</td>
+      <td>63</td>
+      <td>...</td>
+      <td>.557</td>
+      <td>NaN</td>
+      <td>.961</td>
+      <td>NaN</td>
+      <td>.415</td>
+      <td>NaN</td>
+      <td>162.7</td>
+      <td>NaN</td>
+      <td>6.13</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>99</th>
+      <td>100우즈00두1B</td>
+      <td>6.12</td>
+      <td>NaN</td>
+      <td>127</td>
+      <td>NaN</td>
+      <td>565</td>
+      <td>NaN</td>
+      <td>479</td>
+      <td>NaN</td>
+      <td>91</td>
+      <td>...</td>
+      <td>.605</td>
+      <td>NaN</td>
+      <td>1.020</td>
+      <td>NaN</td>
+      <td>.437</td>
+      <td>NaN</td>
+      <td>166.6</td>
+      <td>NaN</td>
+      <td>6.12</td>
+      <td>NaN</td>
+    </tr>
+  </tbody>
+</table>
+<p>100 rows × 55 columns</p>
+</div>
+
+
+
+
+```python
+temp = temp.drop(1,axis=1)
+```
+
+
+```python
+temp = temp.dropna(axis=1)
+```
+
+
+```python
+temp
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>0</th>
+      <th>3</th>
+      <th>5</th>
+      <th>7</th>
+      <th>9</th>
+      <th>11</th>
+      <th>13</th>
+      <th>15</th>
+      <th>17</th>
+      <th>19</th>
+      <th>...</th>
+      <th>35</th>
+      <th>37</th>
+      <th>39</th>
+      <th>41</th>
+      <th>43</th>
+      <th>45</th>
+      <th>47</th>
+      <th>49</th>
+      <th>51</th>
+      <th>53</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1이종범94해SS</td>
+      <td>124</td>
+      <td>561</td>
+      <td>499</td>
+      <td>113</td>
+      <td>196</td>
+      <td>27</td>
+      <td>5</td>
+      <td>19</td>
+      <td>290</td>
+      <td>...</td>
+      <td>2</td>
+      <td>1</td>
+      <td>4</td>
+      <td>.393</td>
+      <td>.452</td>
+      <td>.581</td>
+      <td>1.033</td>
+      <td>.462</td>
+      <td>198.3</td>
+      <td>11.77</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2테임즈15N1B</td>
+      <td>142</td>
+      <td>595</td>
+      <td>472</td>
+      <td>130</td>
+      <td>180</td>
+      <td>42</td>
+      <td>5</td>
+      <td>47</td>
+      <td>373</td>
+      <td>...</td>
+      <td>7</td>
+      <td>0</td>
+      <td>7</td>
+      <td>.381</td>
+      <td>.498</td>
+      <td>.790</td>
+      <td>1.288</td>
+      <td>.530</td>
+      <td>222.3</td>
+      <td>10.71</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3심정수03현RF</td>
+      <td>133</td>
+      <td>601</td>
+      <td>460</td>
+      <td>110</td>
+      <td>154</td>
+      <td>16</td>
+      <td>1</td>
+      <td>53</td>
+      <td>331</td>
+      <td>...</td>
+      <td>14</td>
+      <td>0</td>
+      <td>8</td>
+      <td>.335</td>
+      <td>.478</td>
+      <td>.720</td>
+      <td>1.197</td>
+      <td>.498</td>
+      <td>210.7</td>
+      <td>10.19</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>4이종범97해SS</td>
+      <td>125</td>
+      <td>577</td>
+      <td>484</td>
+      <td>112</td>
+      <td>157</td>
+      <td>28</td>
+      <td>3</td>
+      <td>30</td>
+      <td>281</td>
+      <td>...</td>
+      <td>9</td>
+      <td>0</td>
+      <td>3</td>
+      <td>.324</td>
+      <td>.428</td>
+      <td>.581</td>
+      <td>1.009</td>
+      <td>.431</td>
+      <td>173.2</td>
+      <td>9.70</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>5이종범96해SS</td>
+      <td>113</td>
+      <td>525</td>
+      <td>449</td>
+      <td>94</td>
+      <td>149</td>
+      <td>28</td>
+      <td>1</td>
+      <td>25</td>
+      <td>254</td>
+      <td>...</td>
+      <td>4</td>
+      <td>0</td>
+      <td>2</td>
+      <td>.332</td>
+      <td>.425</td>
+      <td>.566</td>
+      <td>.991</td>
+      <td>.440</td>
+      <td>184.6</td>
+      <td>9.52</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>95</th>
+      <td>96장종훈95한1B</td>
+      <td>126</td>
+      <td>498</td>
+      <td>420</td>
+      <td>77</td>
+      <td>137</td>
+      <td>25</td>
+      <td>4</td>
+      <td>22</td>
+      <td>236</td>
+      <td>...</td>
+      <td>10</td>
+      <td>0</td>
+      <td>4</td>
+      <td>.326</td>
+      <td>.424</td>
+      <td>.562</td>
+      <td>.986</td>
+      <td>.431</td>
+      <td>183.1</td>
+      <td>6.14</td>
+    </tr>
+    <tr>
+      <th>96</th>
+      <td>97이종범93해SS</td>
+      <td>126</td>
+      <td>525</td>
+      <td>475</td>
+      <td>85</td>
+      <td>133</td>
+      <td>16</td>
+      <td>4</td>
+      <td>16</td>
+      <td>205</td>
+      <td>...</td>
+      <td>11</td>
+      <td>8</td>
+      <td>4</td>
+      <td>.280</td>
+      <td>.331</td>
+      <td>.432</td>
+      <td>.762</td>
+      <td>.350</td>
+      <td>127.4</td>
+      <td>6.14</td>
+    </tr>
+    <tr>
+      <th>97</th>
+      <td>98김태균08한1B</td>
+      <td>115</td>
+      <td>484</td>
+      <td>410</td>
+      <td>81</td>
+      <td>133</td>
+      <td>27</td>
+      <td>1</td>
+      <td>31</td>
+      <td>255</td>
+      <td>...</td>
+      <td>8</td>
+      <td>0</td>
+      <td>5</td>
+      <td>.324</td>
+      <td>.417</td>
+      <td>.622</td>
+      <td>1.039</td>
+      <td>.461</td>
+      <td>183.4</td>
+      <td>6.14</td>
+    </tr>
+    <tr>
+      <th>98</th>
+      <td>99김동주02두3B</td>
+      <td>120</td>
+      <td>487</td>
+      <td>415</td>
+      <td>63</td>
+      <td>132</td>
+      <td>21</td>
+      <td>0</td>
+      <td>26</td>
+      <td>231</td>
+      <td>...</td>
+      <td>8</td>
+      <td>0</td>
+      <td>7</td>
+      <td>.318</td>
+      <td>.405</td>
+      <td>.557</td>
+      <td>.961</td>
+      <td>.415</td>
+      <td>162.7</td>
+      <td>6.13</td>
+    </tr>
+    <tr>
+      <th>99</th>
+      <td>100우즈00두1B</td>
+      <td>127</td>
+      <td>565</td>
+      <td>479</td>
+      <td>91</td>
+      <td>151</td>
+      <td>22</td>
+      <td>0</td>
+      <td>39</td>
+      <td>290</td>
+      <td>...</td>
+      <td>13</td>
+      <td>0</td>
+      <td>3</td>
+      <td>.315</td>
+      <td>.414</td>
+      <td>.605</td>
+      <td>1.020</td>
+      <td>.437</td>
+      <td>166.6</td>
+      <td>6.12</td>
+    </tr>
+  </tbody>
+</table>
+<p>100 rows × 27 columns</p>
+</div>
+
+
+
+
+```python
+temp[0] = temp[0].str.replace("^\d+", '',regex=True)
+```
+
+    /var/folders/z2/fv0pqv7s0h14c74jrrz7kv9r0000gn/T/ipykernel_1028/67742940.py:1: SettingWithCopyWarning: 
+    A value is trying to be set on a copy of a slice from a DataFrame.
+    Try using .loc[row_indexer,col_indexer] = value instead
+    
+    See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+      temp[0] = temp[0].str.replace("^\d+", '',regex=True)
+
+
+
+```python
+temp
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>0</th>
+      <th>3</th>
+      <th>5</th>
+      <th>7</th>
+      <th>9</th>
+      <th>11</th>
+      <th>13</th>
+      <th>15</th>
+      <th>17</th>
+      <th>19</th>
+      <th>...</th>
+      <th>35</th>
+      <th>37</th>
+      <th>39</th>
+      <th>41</th>
+      <th>43</th>
+      <th>45</th>
+      <th>47</th>
+      <th>49</th>
+      <th>51</th>
+      <th>53</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>이종범94해SS</td>
+      <td>124</td>
+      <td>561</td>
+      <td>499</td>
+      <td>113</td>
+      <td>196</td>
+      <td>27</td>
+      <td>5</td>
+      <td>19</td>
+      <td>290</td>
+      <td>...</td>
+      <td>2</td>
+      <td>1</td>
+      <td>4</td>
+      <td>.393</td>
+      <td>.452</td>
+      <td>.581</td>
+      <td>1.033</td>
+      <td>.462</td>
+      <td>198.3</td>
+      <td>11.77</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>테임즈15N1B</td>
+      <td>142</td>
+      <td>595</td>
+      <td>472</td>
+      <td>130</td>
+      <td>180</td>
+      <td>42</td>
+      <td>5</td>
+      <td>47</td>
+      <td>373</td>
+      <td>...</td>
+      <td>7</td>
+      <td>0</td>
+      <td>7</td>
+      <td>.381</td>
+      <td>.498</td>
+      <td>.790</td>
+      <td>1.288</td>
+      <td>.530</td>
+      <td>222.3</td>
+      <td>10.71</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>심정수03현RF</td>
+      <td>133</td>
+      <td>601</td>
+      <td>460</td>
+      <td>110</td>
+      <td>154</td>
+      <td>16</td>
+      <td>1</td>
+      <td>53</td>
+      <td>331</td>
+      <td>...</td>
+      <td>14</td>
+      <td>0</td>
+      <td>8</td>
+      <td>.335</td>
+      <td>.478</td>
+      <td>.720</td>
+      <td>1.197</td>
+      <td>.498</td>
+      <td>210.7</td>
+      <td>10.19</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>이종범97해SS</td>
+      <td>125</td>
+      <td>577</td>
+      <td>484</td>
+      <td>112</td>
+      <td>157</td>
+      <td>28</td>
+      <td>3</td>
+      <td>30</td>
+      <td>281</td>
+      <td>...</td>
+      <td>9</td>
+      <td>0</td>
+      <td>3</td>
+      <td>.324</td>
+      <td>.428</td>
+      <td>.581</td>
+      <td>1.009</td>
+      <td>.431</td>
+      <td>173.2</td>
+      <td>9.70</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>이종범96해SS</td>
+      <td>113</td>
+      <td>525</td>
+      <td>449</td>
+      <td>94</td>
+      <td>149</td>
+      <td>28</td>
+      <td>1</td>
+      <td>25</td>
+      <td>254</td>
+      <td>...</td>
+      <td>4</td>
+      <td>0</td>
+      <td>2</td>
+      <td>.332</td>
+      <td>.425</td>
+      <td>.566</td>
+      <td>.991</td>
+      <td>.440</td>
+      <td>184.6</td>
+      <td>9.52</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>95</th>
+      <td>장종훈95한1B</td>
+      <td>126</td>
+      <td>498</td>
+      <td>420</td>
+      <td>77</td>
+      <td>137</td>
+      <td>25</td>
+      <td>4</td>
+      <td>22</td>
+      <td>236</td>
+      <td>...</td>
+      <td>10</td>
+      <td>0</td>
+      <td>4</td>
+      <td>.326</td>
+      <td>.424</td>
+      <td>.562</td>
+      <td>.986</td>
+      <td>.431</td>
+      <td>183.1</td>
+      <td>6.14</td>
+    </tr>
+    <tr>
+      <th>96</th>
+      <td>이종범93해SS</td>
+      <td>126</td>
+      <td>525</td>
+      <td>475</td>
+      <td>85</td>
+      <td>133</td>
+      <td>16</td>
+      <td>4</td>
+      <td>16</td>
+      <td>205</td>
+      <td>...</td>
+      <td>11</td>
+      <td>8</td>
+      <td>4</td>
+      <td>.280</td>
+      <td>.331</td>
+      <td>.432</td>
+      <td>.762</td>
+      <td>.350</td>
+      <td>127.4</td>
+      <td>6.14</td>
+    </tr>
+    <tr>
+      <th>97</th>
+      <td>김태균08한1B</td>
+      <td>115</td>
+      <td>484</td>
+      <td>410</td>
+      <td>81</td>
+      <td>133</td>
+      <td>27</td>
+      <td>1</td>
+      <td>31</td>
+      <td>255</td>
+      <td>...</td>
+      <td>8</td>
+      <td>0</td>
+      <td>5</td>
+      <td>.324</td>
+      <td>.417</td>
+      <td>.622</td>
+      <td>1.039</td>
+      <td>.461</td>
+      <td>183.4</td>
+      <td>6.14</td>
+    </tr>
+    <tr>
+      <th>98</th>
+      <td>김동주02두3B</td>
+      <td>120</td>
+      <td>487</td>
+      <td>415</td>
+      <td>63</td>
+      <td>132</td>
+      <td>21</td>
+      <td>0</td>
+      <td>26</td>
+      <td>231</td>
+      <td>...</td>
+      <td>8</td>
+      <td>0</td>
+      <td>7</td>
+      <td>.318</td>
+      <td>.405</td>
+      <td>.557</td>
+      <td>.961</td>
+      <td>.415</td>
+      <td>162.7</td>
+      <td>6.13</td>
+    </tr>
+    <tr>
+      <th>99</th>
+      <td>우즈00두1B</td>
+      <td>127</td>
+      <td>565</td>
+      <td>479</td>
+      <td>91</td>
+      <td>151</td>
+      <td>22</td>
+      <td>0</td>
+      <td>39</td>
+      <td>290</td>
+      <td>...</td>
+      <td>13</td>
+      <td>0</td>
+      <td>3</td>
+      <td>.315</td>
+      <td>.414</td>
+      <td>.605</td>
+      <td>1.020</td>
+      <td>.437</td>
+      <td>166.6</td>
+      <td>6.12</td>
+    </tr>
+  </tbody>
+</table>
+<p>100 rows × 27 columns</p>
+</div>
+
+
+
+
+```python
+birth = [i.find("a") for i in table.findAll('tr') if 'birth' in i.find('a').attrs['href']]
+```
+
+
+```python
+birth
+```
+
+
+
+
+    [<a href="player.php?name=%EC%9D%B4%EC%A2%85%EB%B2%94&amp;birth=1970-08-15">이종범</a>,
+     <a href="player.php?name=%ED%85%8C%EC%9E%84%EC%A6%88&amp;birth=1986-11-10">테임즈</a>,
+     <a href="player.php?name=%EC%8B%AC%EC%A0%95%EC%88%98&amp;birth=1975-05-05">심정수</a>,
+     <a href="player.php?name=%EC%9D%B4%EC%A2%85%EB%B2%94&amp;birth=1970-08-15">이종범</a>,
+     <a href="player.php?name=%EC%9D%B4%EC%A2%85%EB%B2%94&amp;birth=1970-08-15">이종범</a>,
+     <a href="player.php?name=%EC%9D%B4%EC%8A%B9%EC%97%BD&amp;birth=1976-08-18">이승엽</a>,
+     <a href="player.php?name=%EC%9D%B4%EC%8A%B9%EC%97%BD&amp;birth=1976-08-18">이승엽</a>,
+     <a href="player.php?name=%EC%9D%B4%EB%8C%80%ED%98%B8&amp;birth=1982-06-21">이대호</a>,
+     <a href="player.php?name=%EC%9E%A5%EC%A2%85%ED%9B%88&amp;birth=1968-04-10">장종훈</a>,
+     <a href="player.php?name=%ED%99%8D%ED%98%84%EC%9A%B0&amp;birth=1972-09-28">홍현우</a>,
+     <a href="player.php?name=%EC%96%91%EC%A4%80%ED%98%81&amp;birth=1969-05-26">양준혁</a>,
+     <a href="player.php?name=%EC%9D%B4%EC%8A%B9%EC%97%BD&amp;birth=1976-08-18">이승엽</a>,
+     <a href="player.php?name=%EB%B8%8C%EB%A3%B8%EB%B0%94&amp;birth=1974-04-21">브룸바</a>,
+     <a href="player.php?name=%EB%B0%95%EA%B2%BD%EC%99%84&amp;birth=1972-07-11">박경완</a>,
+     <a href="player.php?name=%EA%B0%95%EC%A0%95%ED%98%B8&amp;birth=1987-04-05">강정호</a>,
+     <a href="player.php?name=%EC%96%91%EC%A4%80%ED%98%81&amp;birth=1969-05-26">양준혁</a>,
+     <a href="player.php?name=%EC%9D%B4%EB%B3%91%EA%B7%9C&amp;birth=1974-10-25">이병규</a>,
+     <a href="player.php?name=%EA%B0%95%EC%A0%95%ED%98%B8&amp;birth=1987-04-05">강정호</a>,
+     <a href="player.php?name=%EB%B0%95%EC%84%9D%EB%AF%BC&amp;birth=1985-06-22">박석민</a>,
+     <a href="player.php?name=%ED%98%B8%EC%84%B8&amp;birth=1965-06-02">호세</a>,
+     <a href="player.php?name=%EB%B0%95%EB%B3%91%ED%98%B8&amp;birth=1986-07-10">박병호</a>,
+     <a href="player.php?name=%EC%B5%9C%ED%98%95%EC%9A%B0&amp;birth=1983-12-16">최형우</a>,
+     <a href="player.php?name=%EC%9E%A5%EC%A2%85%ED%9B%88&amp;birth=1968-04-10">장종훈</a>,
+     <a href="player.php?name=%EC%B5%9C%ED%98%95%EC%9A%B0&amp;birth=1983-12-16">최형우</a>,
+     <a href="player.php?name=%EC%84%9C%EA%B1%B4%EC%B0%BD&amp;birth=1989-08-22">서건창</a>,
+     <a href="player.php?name=%EB%B0%95%EC%9E%AC%ED%99%8D&amp;birth=1973-09-07">박재홍</a>,
+     <a href="player.php?name=%EB%B0%95%EA%B2%BD%EC%99%84&amp;birth=1972-07-11">박경완</a>,
+     <a href="player.php?name=%EA%B9%80%EC%9E%AC%ED%99%98&amp;birth=1988-09-22">김재환</a>,
+     <a href="player.php?name=%EC%8B%AC%EC%A0%95%EC%88%98&amp;birth=1975-05-05">심정수</a>,
+     <a href="player.php?name=%EA%B9%80%EB%8F%99%EC%A3%BC&amp;birth=1976-02-03">김동주</a>,
+     <a href="player.php?name=%EC%9E%A5%ED%9A%A8%EC%A1%B0&amp;birth=1956-07-06">장효조</a>,
+     <a href="player.php?name=%EC%9C%A0%EC%A7%80%ED%98%84&amp;birth=1971-05-25">유지현</a>,
+     <a href="player.php?name=%EA%B9%80%EA%B8%B0%ED%83%9C&amp;birth=1969-05-23">김기태</a>,
+     <a href="player.php?name=%EC%B5%9C%EC%A0%95&amp;birth=1987-02-28">최정</a>,
+     <a href="player.php?name=%EA%B9%80%EA%B8%B0%ED%83%9C&amp;birth=1969-05-23">김기태</a>,
+     <a href="player.php?name=%EA%B9%80%EB%8F%99%EC%A3%BC&amp;birth=1976-02-03">김동주</a>,
+     <a href="player.php?name=%EC%9D%B4%EC%A0%95%ED%9B%88&amp;birth=1963-08-28">이정훈</a>,
+     <a href="player.php?name=%EB%A7%88%ED%95%B4%EC%98%81&amp;birth=1970-08-14">마해영</a>,
+     <a href="player.php?name=%EA%B9%80%ED%98%84%EC%88%98&amp;birth=1988-01-12">김현수</a>,
+     <a href="player.php?name=%EC%B5%9C%EC%A0%95&amp;birth=1987-02-28">최정</a>,
+     <a href="player.php?name=%EC%9D%B4%EC%A2%85%EB%B2%94&amp;birth=1970-08-15">이종범</a>,
+     <a href="player.php?name=%EC%B5%9C%EC%9D%B5%EC%84%B1&amp;birth=1972-02-11">최익성</a>,
+     <a href="player.php?name=%EB%B0%95%EB%B3%91%ED%98%B8&amp;birth=1986-07-10">박병호</a>,
+     <a href="player.php?name=%EB%B0%95%EA%B1%B4%EC%9A%B0&amp;birth=1990-09-08">박건우</a>,
+     <a href="player.php?name=%EC%9D%B4%EB%8C%80%ED%98%B8&amp;birth=1982-06-21">이대호</a>,
+     <a href="player.php?name=%EA%B9%80%ED%83%9C%EA%B7%A0&amp;birth=1982-05-29">김태균</a>,
+     <a href="player.php?name=%ED%95%9C%EB%8C%80%ED%99%94&amp;birth=1960-07-08">한대화</a>,
+     <a href="player.php?name=%EC%9E%A5%EC%A2%85%ED%9B%88&amp;birth=1968-04-10">장종훈</a>,
+     <a href="player.php?name=%EA%B9%80%EC%9E%AC%ED%99%98&amp;birth=1988-09-22">김재환</a>,
+     <a href="player.php?name=%EC%9D%B4%EB%8C%80%ED%98%B8&amp;birth=1982-06-21">이대호</a>,
+     <a href="player.php?name=%EA%B9%80%ED%98%84%EC%88%98&amp;birth=1988-01-12">김현수</a>,
+     <a href="player.php?name=%EC%A0%95%EA%B7%BC%EC%9A%B0&amp;birth=1982-10-02">정근우</a>,
+     <a href="player.php?name=%ED%99%8D%ED%98%84%EC%9A%B0&amp;birth=1972-09-28">홍현우</a>,
+     <a href="player.php?name=%EC%96%91%EC%A4%80%ED%98%81&amp;birth=1969-05-26">양준혁</a>,
+     <a href="player.php?name=%EC%9D%B4%EC%8A%B9%EC%97%BD&amp;birth=1976-08-18">이승엽</a>,
+     <a href="player.php?name=%EB%B0%95%EC%9E%AC%ED%99%8D&amp;birth=1973-09-07">박재홍</a>,
+     <a href="player.php?name=%EC%9D%B4%EC%8A%B9%EC%97%BD&amp;birth=1976-08-18">이승엽</a>,
+     <a href="player.php?name=%EC%96%91%EC%A4%80%ED%98%81&amp;birth=1969-05-26">양준혁</a>,
+     <a href="player.php?name=%EA%B9%80%ED%98%84%EC%88%98&amp;birth=1988-01-12">김현수</a>,
+     <a href="player.php?name=%EC%96%91%EC%A4%80%ED%98%81&amp;birth=1969-05-26">양준혁</a>,
+     <a href="player.php?name=%EC%B5%9C%ED%98%95%EC%9A%B0&amp;birth=1983-12-16">최형우</a>,
+     <a href="player.php?name=%EB%B0%95%EC%9E%AC%ED%99%8D&amp;birth=1973-09-07">박재홍</a>,
+     <a href="player.php?name=%ED%98%B8%EC%84%B8&amp;birth=1965-06-02">호세</a>,
+     <a href="player.php?name=%EA%B9%80%EA%B8%B0%ED%83%9C&amp;birth=1969-05-23">김기태</a>,
+     <a href="player.php?name=%EB%B0%95%EB%B3%91%ED%98%B8&amp;birth=1986-07-10">박병호</a>,
+     <a href="player.php?name=%EB%B0%95%EC%A0%95%ED%83%9C&amp;birth=1969-01-27">박정태</a>,
+     <a href="player.php?name=%EC%B5%9C%EC%A0%95&amp;birth=1987-02-28">최정</a>,
+     <a href="player.php?name=%EC%9D%B4%EB%A7%8C%EC%88%98&amp;birth=1958-09-19">이만수</a>,
+     <a href="player.php?name=%ED%99%8D%ED%98%84%EC%9A%B0&amp;birth=1972-09-28">홍현우</a>,
+     <a href="player.php?name=%EC%9D%B4%EB%8C%80%ED%98%B8&amp;birth=1982-06-21">이대호</a>,
+     <a href="player.php?name=%EB%B0%95%EB%B3%91%ED%98%B8&amp;birth=1986-07-10">박병호</a>,
+     <a href="player.php?name=%EB%82%98%EB%B0%94%EB%A1%9C&amp;birth=1987-10-31">나바로</a>,
+     <a href="player.php?name=%EC%86%A1%EC%A7%80%EB%A7%8C&amp;birth=1973-03-02">송지만</a>,
+     <a href="player.php?name=%EC%96%91%EC%9D%98%EC%A7%80&amp;birth=1987-06-05">양의지</a>,
+     <a href="player.php?name=%EC%8B%AC%EC%9E%AC%ED%95%99&amp;birth=1972-10-18">심재학</a>,
+     <a href="player.php?name=%ED%8E%98%EB%A5%B4%EB%82%9C%EB%8D%B0%EC%8A%A4&amp;birth=1974-11-02">페르난데스</a>,
+     <a href="player.php?name=%EC%9A%B0%EC%A6%88&amp;birth=1969-08-19">우즈</a>,
+     <a href="player.php?name=%EC%96%91%EC%A4%80%ED%98%81&amp;birth=1969-05-26">양준혁</a>,
+     <a href="player.php?name=%EC%9D%B4%EC%A0%95%ED%9B%88&amp;birth=1963-08-28">이정훈</a>,
+     <a href="player.php?name=%EB%8D%B0%EC%9D%B4%EB%B9%84%EC%8A%A4&amp;birth=1969-10-03">데이비스</a>,
+     <a href="player.php?name=%EC%BF%A8%EB%B0%94&amp;birth=1966-06-13">쿨바</a>,
+     <a href="player.php?name=%EC%9D%B4%EB%A7%8C%EC%88%98&amp;birth=1958-09-19">이만수</a>,
+     <a href="player.php?name=%ED%85%8C%EC%9E%84%EC%A6%88&amp;birth=1986-11-10">테임즈</a>,
+     <a href="player.php?name=%ED%99%8D%EB%AC%B8%EC%A2%85&amp;birth=1954-11-14">홍문종</a>,
+     <a href="player.php?name=%EA%B9%80%EC%84%B1%EB%9E%98&amp;birth=1961-03-23">김성래</a>,
+     <a href="player.php?name=%EC%86%90%EC%95%84%EC%84%AD&amp;birth=1988-03-18">손아섭</a>,
+     <a href="player.php?name=%EC%9D%B4%EB%A7%8C%EC%88%98&amp;birth=1958-09-19">이만수</a>,
+     <a href="player.php?name=%EB%B8%8C%EB%A6%AC%EB%98%90&amp;birth=1972-05-28">브리또</a>,
+     <a href="player.php?name=%EB%B0%95%EB%B3%91%ED%98%B8&amp;birth=1986-07-10">박병호</a>,
+     <a href="player.php?name=%EB%82%98%EB%B0%94%EB%A1%9C&amp;birth=1987-10-31">나바로</a>,
+     <a href="player.php?name=%EC%9D%B4%EC%88%9C%EC%B2%A0&amp;birth=1961-04-18">이순철</a>,
+     <a href="player.php?name=%EC%9D%B4%EC%88%9C%EC%B2%A0&amp;birth=1961-04-18">이순철</a>,
+     <a href="player.php?name=%EC%96%91%EC%A4%80%ED%98%81&amp;birth=1969-05-26">양준혁</a>,
+     <a href="player.php?name=%EC%96%91%EC%A4%80%ED%98%81&amp;birth=1969-05-26">양준혁</a>,
+     <a href="player.php?name=%ED%99%8D%EC%84%B1%ED%9D%94&amp;birth=1977-02-28">홍성흔</a>,
+     <a href="player.php?name=%EC%9E%A5%EC%A2%85%ED%9B%88&amp;birth=1968-04-10">장종훈</a>,
+     <a href="player.php?name=%EC%9D%B4%EC%A2%85%EB%B2%94&amp;birth=1970-08-15">이종범</a>,
+     <a href="player.php?name=%EA%B9%80%ED%83%9C%EA%B7%A0&amp;birth=1982-05-29">김태균</a>,
+     <a href="player.php?name=%EA%B9%80%EB%8F%99%EC%A3%BC&amp;birth=1976-02-03">김동주</a>,
+     <a href="player.php?name=%EC%9A%B0%EC%A6%88&amp;birth=1969-08-19">우즈</a>]
+
+
+
+
+```python
+p = re.compile("\d{4}\-\d{2}\-\d{2}")
+birth = [p.findall(i.attrs['href'])[0] for i in birth]
+```
+
+
+```python
+birth
+```
+
+
+
+
+    ['1970-08-15',
+     '1986-11-10',
+     '1975-05-05',
+     '1970-08-15',
+     '1970-08-15',
+     '1976-08-18',
+     '1976-08-18',
+     '1982-06-21',
+     '1968-04-10',
+     '1972-09-28',
+     '1969-05-26',
+     '1976-08-18',
+     '1974-04-21',
+     '1972-07-11',
+     '1987-04-05',
+     '1969-05-26',
+     '1974-10-25',
+     '1987-04-05',
+     '1985-06-22',
+     '1965-06-02',
+     '1986-07-10',
+     '1983-12-16',
+     '1968-04-10',
+     '1983-12-16',
+     '1989-08-22',
+     '1973-09-07',
+     '1972-07-11',
+     '1988-09-22',
+     '1975-05-05',
+     '1976-02-03',
+     '1956-07-06',
+     '1971-05-25',
+     '1969-05-23',
+     '1987-02-28',
+     '1969-05-23',
+     '1976-02-03',
+     '1963-08-28',
+     '1970-08-14',
+     '1988-01-12',
+     '1987-02-28',
+     '1970-08-15',
+     '1972-02-11',
+     '1986-07-10',
+     '1990-09-08',
+     '1982-06-21',
+     '1982-05-29',
+     '1960-07-08',
+     '1968-04-10',
+     '1988-09-22',
+     '1982-06-21',
+     '1988-01-12',
+     '1982-10-02',
+     '1972-09-28',
+     '1969-05-26',
+     '1976-08-18',
+     '1973-09-07',
+     '1976-08-18',
+     '1969-05-26',
+     '1988-01-12',
+     '1969-05-26',
+     '1983-12-16',
+     '1973-09-07',
+     '1965-06-02',
+     '1969-05-23',
+     '1986-07-10',
+     '1969-01-27',
+     '1987-02-28',
+     '1958-09-19',
+     '1972-09-28',
+     '1982-06-21',
+     '1986-07-10',
+     '1987-10-31',
+     '1973-03-02',
+     '1987-06-05',
+     '1972-10-18',
+     '1974-11-02',
+     '1969-08-19',
+     '1969-05-26',
+     '1963-08-28',
+     '1969-10-03',
+     '1966-06-13',
+     '1958-09-19',
+     '1986-11-10',
+     '1954-11-14',
+     '1961-03-23',
+     '1988-03-18',
+     '1958-09-19',
+     '1972-05-28',
+     '1986-07-10',
+     '1987-10-31',
+     '1961-04-18',
+     '1961-04-18',
+     '1969-05-26',
+     '1969-05-26',
+     '1977-02-28',
+     '1968-04-10',
+     '1970-08-15',
+     '1982-05-29',
+     '1976-02-03',
+     '1969-08-19']
+
+
+
+
+```python
+temp['생일']=birth
+```
+
+    /var/folders/z2/fv0pqv7s0h14c74jrrz7kv9r0000gn/T/ipykernel_1028/2155520553.py:1: SettingWithCopyWarning: 
+    A value is trying to be set on a copy of a slice from a DataFrame.
+    Try using .loc[row_indexer,col_indexer] = value instead
+    
+    See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+      temp['생일']=birth
+
+
+
+```python
+temp
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>0</th>
+      <th>3</th>
+      <th>5</th>
+      <th>7</th>
+      <th>9</th>
+      <th>11</th>
+      <th>13</th>
+      <th>15</th>
+      <th>17</th>
+      <th>19</th>
+      <th>...</th>
+      <th>37</th>
+      <th>39</th>
+      <th>41</th>
+      <th>43</th>
+      <th>45</th>
+      <th>47</th>
+      <th>49</th>
+      <th>51</th>
+      <th>53</th>
+      <th>생일</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>이종범94해SS</td>
+      <td>124</td>
+      <td>561</td>
+      <td>499</td>
+      <td>113</td>
+      <td>196</td>
+      <td>27</td>
+      <td>5</td>
+      <td>19</td>
+      <td>290</td>
+      <td>...</td>
+      <td>1</td>
+      <td>4</td>
+      <td>.393</td>
+      <td>.452</td>
+      <td>.581</td>
+      <td>1.033</td>
+      <td>.462</td>
+      <td>198.3</td>
+      <td>11.77</td>
+      <td>1970-08-15</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>테임즈15N1B</td>
+      <td>142</td>
+      <td>595</td>
+      <td>472</td>
+      <td>130</td>
+      <td>180</td>
+      <td>42</td>
+      <td>5</td>
+      <td>47</td>
+      <td>373</td>
+      <td>...</td>
+      <td>0</td>
+      <td>7</td>
+      <td>.381</td>
+      <td>.498</td>
+      <td>.790</td>
+      <td>1.288</td>
+      <td>.530</td>
+      <td>222.3</td>
+      <td>10.71</td>
+      <td>1986-11-10</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>심정수03현RF</td>
+      <td>133</td>
+      <td>601</td>
+      <td>460</td>
+      <td>110</td>
+      <td>154</td>
+      <td>16</td>
+      <td>1</td>
+      <td>53</td>
+      <td>331</td>
+      <td>...</td>
+      <td>0</td>
+      <td>8</td>
+      <td>.335</td>
+      <td>.478</td>
+      <td>.720</td>
+      <td>1.197</td>
+      <td>.498</td>
+      <td>210.7</td>
+      <td>10.19</td>
+      <td>1975-05-05</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>이종범97해SS</td>
+      <td>125</td>
+      <td>577</td>
+      <td>484</td>
+      <td>112</td>
+      <td>157</td>
+      <td>28</td>
+      <td>3</td>
+      <td>30</td>
+      <td>281</td>
+      <td>...</td>
+      <td>0</td>
+      <td>3</td>
+      <td>.324</td>
+      <td>.428</td>
+      <td>.581</td>
+      <td>1.009</td>
+      <td>.431</td>
+      <td>173.2</td>
+      <td>9.70</td>
+      <td>1970-08-15</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>이종범96해SS</td>
+      <td>113</td>
+      <td>525</td>
+      <td>449</td>
+      <td>94</td>
+      <td>149</td>
+      <td>28</td>
+      <td>1</td>
+      <td>25</td>
+      <td>254</td>
+      <td>...</td>
+      <td>0</td>
+      <td>2</td>
+      <td>.332</td>
+      <td>.425</td>
+      <td>.566</td>
+      <td>.991</td>
+      <td>.440</td>
+      <td>184.6</td>
+      <td>9.52</td>
+      <td>1970-08-15</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>95</th>
+      <td>장종훈95한1B</td>
+      <td>126</td>
+      <td>498</td>
+      <td>420</td>
+      <td>77</td>
+      <td>137</td>
+      <td>25</td>
+      <td>4</td>
+      <td>22</td>
+      <td>236</td>
+      <td>...</td>
+      <td>0</td>
+      <td>4</td>
+      <td>.326</td>
+      <td>.424</td>
+      <td>.562</td>
+      <td>.986</td>
+      <td>.431</td>
+      <td>183.1</td>
+      <td>6.14</td>
+      <td>1968-04-10</td>
+    </tr>
+    <tr>
+      <th>96</th>
+      <td>이종범93해SS</td>
+      <td>126</td>
+      <td>525</td>
+      <td>475</td>
+      <td>85</td>
+      <td>133</td>
+      <td>16</td>
+      <td>4</td>
+      <td>16</td>
+      <td>205</td>
+      <td>...</td>
+      <td>8</td>
+      <td>4</td>
+      <td>.280</td>
+      <td>.331</td>
+      <td>.432</td>
+      <td>.762</td>
+      <td>.350</td>
+      <td>127.4</td>
+      <td>6.14</td>
+      <td>1970-08-15</td>
+    </tr>
+    <tr>
+      <th>97</th>
+      <td>김태균08한1B</td>
+      <td>115</td>
+      <td>484</td>
+      <td>410</td>
+      <td>81</td>
+      <td>133</td>
+      <td>27</td>
+      <td>1</td>
+      <td>31</td>
+      <td>255</td>
+      <td>...</td>
+      <td>0</td>
+      <td>5</td>
+      <td>.324</td>
+      <td>.417</td>
+      <td>.622</td>
+      <td>1.039</td>
+      <td>.461</td>
+      <td>183.4</td>
+      <td>6.14</td>
+      <td>1982-05-29</td>
+    </tr>
+    <tr>
+      <th>98</th>
+      <td>김동주02두3B</td>
+      <td>120</td>
+      <td>487</td>
+      <td>415</td>
+      <td>63</td>
+      <td>132</td>
+      <td>21</td>
+      <td>0</td>
+      <td>26</td>
+      <td>231</td>
+      <td>...</td>
+      <td>0</td>
+      <td>7</td>
+      <td>.318</td>
+      <td>.405</td>
+      <td>.557</td>
+      <td>.961</td>
+      <td>.415</td>
+      <td>162.7</td>
+      <td>6.13</td>
+      <td>1976-02-03</td>
+    </tr>
+    <tr>
+      <th>99</th>
+      <td>우즈00두1B</td>
+      <td>127</td>
+      <td>565</td>
+      <td>479</td>
+      <td>91</td>
+      <td>151</td>
+      <td>22</td>
+      <td>0</td>
+      <td>39</td>
+      <td>290</td>
+      <td>...</td>
+      <td>0</td>
+      <td>3</td>
+      <td>.315</td>
+      <td>.414</td>
+      <td>.605</td>
+      <td>1.020</td>
+      <td>.437</td>
+      <td>166.6</td>
+      <td>6.12</td>
+      <td>1969-08-19</td>
+    </tr>
+  </tbody>
+</table>
+<p>100 rows × 28 columns</p>
+</div>
+
+
+
+
+```python
+columns = ['선수'] + [i.text for i in soup.findAll("tr")[0].findAll("th")][4:-3] + ['타율', '출루', '장타', 'OPS', 'wOBA', 'wRC+', 'WAR+', '생일']
+```
+
+
+```python
+columns
+```
+
+
+
+
+    ['선수',
+     'G',
+     '타석',
+     '타수',
+     '득점',
+     '안타',
+     '2타',
+     '3타',
+     '홈런',
+     '루타',
+     '타점',
+     '도루',
+     '도실',
+     '볼넷',
+     '사구',
+     '고4',
+     '삼진',
+     '병살',
+     '희타',
+     '희비',
+     '타율',
+     '출루',
+     '장타',
+     'OPS',
+     'wOBA',
+     'wRC+',
+     'WAR+',
+     '생일']
+
+
+
+
+```python
+temp.columns=columns
+```
+
+
+```python
+temp
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>선수</th>
+      <th>G</th>
+      <th>타석</th>
+      <th>타수</th>
+      <th>득점</th>
+      <th>안타</th>
+      <th>2타</th>
+      <th>3타</th>
+      <th>홈런</th>
+      <th>루타</th>
+      <th>...</th>
+      <th>희타</th>
+      <th>희비</th>
+      <th>타율</th>
+      <th>출루</th>
+      <th>장타</th>
+      <th>OPS</th>
+      <th>wOBA</th>
+      <th>wRC+</th>
+      <th>WAR+</th>
+      <th>생일</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>이종범94해SS</td>
+      <td>124</td>
+      <td>561</td>
+      <td>499</td>
+      <td>113</td>
+      <td>196</td>
+      <td>27</td>
+      <td>5</td>
+      <td>19</td>
+      <td>290</td>
+      <td>...</td>
+      <td>1</td>
+      <td>4</td>
+      <td>.393</td>
+      <td>.452</td>
+      <td>.581</td>
+      <td>1.033</td>
+      <td>.462</td>
+      <td>198.3</td>
+      <td>11.77</td>
+      <td>1970-08-15</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>테임즈15N1B</td>
+      <td>142</td>
+      <td>595</td>
+      <td>472</td>
+      <td>130</td>
+      <td>180</td>
+      <td>42</td>
+      <td>5</td>
+      <td>47</td>
+      <td>373</td>
+      <td>...</td>
+      <td>0</td>
+      <td>7</td>
+      <td>.381</td>
+      <td>.498</td>
+      <td>.790</td>
+      <td>1.288</td>
+      <td>.530</td>
+      <td>222.3</td>
+      <td>10.71</td>
+      <td>1986-11-10</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>심정수03현RF</td>
+      <td>133</td>
+      <td>601</td>
+      <td>460</td>
+      <td>110</td>
+      <td>154</td>
+      <td>16</td>
+      <td>1</td>
+      <td>53</td>
+      <td>331</td>
+      <td>...</td>
+      <td>0</td>
+      <td>8</td>
+      <td>.335</td>
+      <td>.478</td>
+      <td>.720</td>
+      <td>1.197</td>
+      <td>.498</td>
+      <td>210.7</td>
+      <td>10.19</td>
+      <td>1975-05-05</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>이종범97해SS</td>
+      <td>125</td>
+      <td>577</td>
+      <td>484</td>
+      <td>112</td>
+      <td>157</td>
+      <td>28</td>
+      <td>3</td>
+      <td>30</td>
+      <td>281</td>
+      <td>...</td>
+      <td>0</td>
+      <td>3</td>
+      <td>.324</td>
+      <td>.428</td>
+      <td>.581</td>
+      <td>1.009</td>
+      <td>.431</td>
+      <td>173.2</td>
+      <td>9.70</td>
+      <td>1970-08-15</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>이종범96해SS</td>
+      <td>113</td>
+      <td>525</td>
+      <td>449</td>
+      <td>94</td>
+      <td>149</td>
+      <td>28</td>
+      <td>1</td>
+      <td>25</td>
+      <td>254</td>
+      <td>...</td>
+      <td>0</td>
+      <td>2</td>
+      <td>.332</td>
+      <td>.425</td>
+      <td>.566</td>
+      <td>.991</td>
+      <td>.440</td>
+      <td>184.6</td>
+      <td>9.52</td>
+      <td>1970-08-15</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>95</th>
+      <td>장종훈95한1B</td>
+      <td>126</td>
+      <td>498</td>
+      <td>420</td>
+      <td>77</td>
+      <td>137</td>
+      <td>25</td>
+      <td>4</td>
+      <td>22</td>
+      <td>236</td>
+      <td>...</td>
+      <td>0</td>
+      <td>4</td>
+      <td>.326</td>
+      <td>.424</td>
+      <td>.562</td>
+      <td>.986</td>
+      <td>.431</td>
+      <td>183.1</td>
+      <td>6.14</td>
+      <td>1968-04-10</td>
+    </tr>
+    <tr>
+      <th>96</th>
+      <td>이종범93해SS</td>
+      <td>126</td>
+      <td>525</td>
+      <td>475</td>
+      <td>85</td>
+      <td>133</td>
+      <td>16</td>
+      <td>4</td>
+      <td>16</td>
+      <td>205</td>
+      <td>...</td>
+      <td>8</td>
+      <td>4</td>
+      <td>.280</td>
+      <td>.331</td>
+      <td>.432</td>
+      <td>.762</td>
+      <td>.350</td>
+      <td>127.4</td>
+      <td>6.14</td>
+      <td>1970-08-15</td>
+    </tr>
+    <tr>
+      <th>97</th>
+      <td>김태균08한1B</td>
+      <td>115</td>
+      <td>484</td>
+      <td>410</td>
+      <td>81</td>
+      <td>133</td>
+      <td>27</td>
+      <td>1</td>
+      <td>31</td>
+      <td>255</td>
+      <td>...</td>
+      <td>0</td>
+      <td>5</td>
+      <td>.324</td>
+      <td>.417</td>
+      <td>.622</td>
+      <td>1.039</td>
+      <td>.461</td>
+      <td>183.4</td>
+      <td>6.14</td>
+      <td>1982-05-29</td>
+    </tr>
+    <tr>
+      <th>98</th>
+      <td>김동주02두3B</td>
+      <td>120</td>
+      <td>487</td>
+      <td>415</td>
+      <td>63</td>
+      <td>132</td>
+      <td>21</td>
+      <td>0</td>
+      <td>26</td>
+      <td>231</td>
+      <td>...</td>
+      <td>0</td>
+      <td>7</td>
+      <td>.318</td>
+      <td>.405</td>
+      <td>.557</td>
+      <td>.961</td>
+      <td>.415</td>
+      <td>162.7</td>
+      <td>6.13</td>
+      <td>1976-02-03</td>
+    </tr>
+    <tr>
+      <th>99</th>
+      <td>우즈00두1B</td>
+      <td>127</td>
+      <td>565</td>
+      <td>479</td>
+      <td>91</td>
+      <td>151</td>
+      <td>22</td>
+      <td>0</td>
+      <td>39</td>
+      <td>290</td>
+      <td>...</td>
+      <td>0</td>
+      <td>3</td>
+      <td>.315</td>
+      <td>.414</td>
+      <td>.605</td>
+      <td>1.020</td>
+      <td>.437</td>
+      <td>166.6</td>
+      <td>6.12</td>
+      <td>1969-08-19</td>
+    </tr>
+  </tbody>
+</table>
+<p>100 rows × 28 columns</p>
+</div>
+
+
+
+
+```python
+result=temp
+```
+
+
+```python
+result['이름'] = result['선수'].str.findall("^[ㄱ-힣]+").apply(lambda x: x[0])
+```
+
+    /var/folders/z2/fv0pqv7s0h14c74jrrz7kv9r0000gn/T/ipykernel_1028/1598001127.py:1: SettingWithCopyWarning: 
+    A value is trying to be set on a copy of a slice from a DataFrame.
+    Try using .loc[row_indexer,col_indexer] = value instead
+    
+    See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+      result['이름'] = result['선수'].str.findall("^[ㄱ-힣]+").apply(lambda x: x[0])
+
+
+
+```python
+result
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>선수</th>
+      <th>G</th>
+      <th>타석</th>
+      <th>타수</th>
+      <th>득점</th>
+      <th>안타</th>
+      <th>2타</th>
+      <th>3타</th>
+      <th>홈런</th>
+      <th>루타</th>
+      <th>...</th>
+      <th>희비</th>
+      <th>타율</th>
+      <th>출루</th>
+      <th>장타</th>
+      <th>OPS</th>
+      <th>wOBA</th>
+      <th>wRC+</th>
+      <th>WAR+</th>
+      <th>생일</th>
+      <th>이름</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>이종범94해SS</td>
+      <td>124</td>
+      <td>561</td>
+      <td>499</td>
+      <td>113</td>
+      <td>196</td>
+      <td>27</td>
+      <td>5</td>
+      <td>19</td>
+      <td>290</td>
+      <td>...</td>
+      <td>4</td>
+      <td>.393</td>
+      <td>.452</td>
+      <td>.581</td>
+      <td>1.033</td>
+      <td>.462</td>
+      <td>198.3</td>
+      <td>11.77</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>테임즈15N1B</td>
+      <td>142</td>
+      <td>595</td>
+      <td>472</td>
+      <td>130</td>
+      <td>180</td>
+      <td>42</td>
+      <td>5</td>
+      <td>47</td>
+      <td>373</td>
+      <td>...</td>
+      <td>7</td>
+      <td>.381</td>
+      <td>.498</td>
+      <td>.790</td>
+      <td>1.288</td>
+      <td>.530</td>
+      <td>222.3</td>
+      <td>10.71</td>
+      <td>1986-11-10</td>
+      <td>테임즈</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>심정수03현RF</td>
+      <td>133</td>
+      <td>601</td>
+      <td>460</td>
+      <td>110</td>
+      <td>154</td>
+      <td>16</td>
+      <td>1</td>
+      <td>53</td>
+      <td>331</td>
+      <td>...</td>
+      <td>8</td>
+      <td>.335</td>
+      <td>.478</td>
+      <td>.720</td>
+      <td>1.197</td>
+      <td>.498</td>
+      <td>210.7</td>
+      <td>10.19</td>
+      <td>1975-05-05</td>
+      <td>심정수</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>이종범97해SS</td>
+      <td>125</td>
+      <td>577</td>
+      <td>484</td>
+      <td>112</td>
+      <td>157</td>
+      <td>28</td>
+      <td>3</td>
+      <td>30</td>
+      <td>281</td>
+      <td>...</td>
+      <td>3</td>
+      <td>.324</td>
+      <td>.428</td>
+      <td>.581</td>
+      <td>1.009</td>
+      <td>.431</td>
+      <td>173.2</td>
+      <td>9.70</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>이종범96해SS</td>
+      <td>113</td>
+      <td>525</td>
+      <td>449</td>
+      <td>94</td>
+      <td>149</td>
+      <td>28</td>
+      <td>1</td>
+      <td>25</td>
+      <td>254</td>
+      <td>...</td>
+      <td>2</td>
+      <td>.332</td>
+      <td>.425</td>
+      <td>.566</td>
+      <td>.991</td>
+      <td>.440</td>
+      <td>184.6</td>
+      <td>9.52</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>95</th>
+      <td>장종훈95한1B</td>
+      <td>126</td>
+      <td>498</td>
+      <td>420</td>
+      <td>77</td>
+      <td>137</td>
+      <td>25</td>
+      <td>4</td>
+      <td>22</td>
+      <td>236</td>
+      <td>...</td>
+      <td>4</td>
+      <td>.326</td>
+      <td>.424</td>
+      <td>.562</td>
+      <td>.986</td>
+      <td>.431</td>
+      <td>183.1</td>
+      <td>6.14</td>
+      <td>1968-04-10</td>
+      <td>장종훈</td>
+    </tr>
+    <tr>
+      <th>96</th>
+      <td>이종범93해SS</td>
+      <td>126</td>
+      <td>525</td>
+      <td>475</td>
+      <td>85</td>
+      <td>133</td>
+      <td>16</td>
+      <td>4</td>
+      <td>16</td>
+      <td>205</td>
+      <td>...</td>
+      <td>4</td>
+      <td>.280</td>
+      <td>.331</td>
+      <td>.432</td>
+      <td>.762</td>
+      <td>.350</td>
+      <td>127.4</td>
+      <td>6.14</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+    </tr>
+    <tr>
+      <th>97</th>
+      <td>김태균08한1B</td>
+      <td>115</td>
+      <td>484</td>
+      <td>410</td>
+      <td>81</td>
+      <td>133</td>
+      <td>27</td>
+      <td>1</td>
+      <td>31</td>
+      <td>255</td>
+      <td>...</td>
+      <td>5</td>
+      <td>.324</td>
+      <td>.417</td>
+      <td>.622</td>
+      <td>1.039</td>
+      <td>.461</td>
+      <td>183.4</td>
+      <td>6.14</td>
+      <td>1982-05-29</td>
+      <td>김태균</td>
+    </tr>
+    <tr>
+      <th>98</th>
+      <td>김동주02두3B</td>
+      <td>120</td>
+      <td>487</td>
+      <td>415</td>
+      <td>63</td>
+      <td>132</td>
+      <td>21</td>
+      <td>0</td>
+      <td>26</td>
+      <td>231</td>
+      <td>...</td>
+      <td>7</td>
+      <td>.318</td>
+      <td>.405</td>
+      <td>.557</td>
+      <td>.961</td>
+      <td>.415</td>
+      <td>162.7</td>
+      <td>6.13</td>
+      <td>1976-02-03</td>
+      <td>김동주</td>
+    </tr>
+    <tr>
+      <th>99</th>
+      <td>우즈00두1B</td>
+      <td>127</td>
+      <td>565</td>
+      <td>479</td>
+      <td>91</td>
+      <td>151</td>
+      <td>22</td>
+      <td>0</td>
+      <td>39</td>
+      <td>290</td>
+      <td>...</td>
+      <td>3</td>
+      <td>.315</td>
+      <td>.414</td>
+      <td>.605</td>
+      <td>1.020</td>
+      <td>.437</td>
+      <td>166.6</td>
+      <td>6.12</td>
+      <td>1969-08-19</td>
+      <td>우즈</td>
+    </tr>
+  </tbody>
+</table>
+<p>100 rows × 29 columns</p>
+</div>
+
+
+
+
+```python
+result['선수'] = result.apply(lambda x: x['선수'].replace(x['이름'], ''), axis=1)
+```
+
+    /var/folders/z2/fv0pqv7s0h14c74jrrz7kv9r0000gn/T/ipykernel_1028/217578977.py:1: SettingWithCopyWarning: 
+    A value is trying to be set on a copy of a slice from a DataFrame.
+    Try using .loc[row_indexer,col_indexer] = value instead
+    
+    See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+      result['선수'] = result.apply(lambda x: x['선수'].replace(x['이름'], ''), axis=1)
+
+
+
+```python
+result
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>선수</th>
+      <th>G</th>
+      <th>타석</th>
+      <th>타수</th>
+      <th>득점</th>
+      <th>안타</th>
+      <th>2타</th>
+      <th>3타</th>
+      <th>홈런</th>
+      <th>루타</th>
+      <th>...</th>
+      <th>희비</th>
+      <th>타율</th>
+      <th>출루</th>
+      <th>장타</th>
+      <th>OPS</th>
+      <th>wOBA</th>
+      <th>wRC+</th>
+      <th>WAR+</th>
+      <th>생일</th>
+      <th>이름</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>94해SS</td>
+      <td>124</td>
+      <td>561</td>
+      <td>499</td>
+      <td>113</td>
+      <td>196</td>
+      <td>27</td>
+      <td>5</td>
+      <td>19</td>
+      <td>290</td>
+      <td>...</td>
+      <td>4</td>
+      <td>.393</td>
+      <td>.452</td>
+      <td>.581</td>
+      <td>1.033</td>
+      <td>.462</td>
+      <td>198.3</td>
+      <td>11.77</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>15N1B</td>
+      <td>142</td>
+      <td>595</td>
+      <td>472</td>
+      <td>130</td>
+      <td>180</td>
+      <td>42</td>
+      <td>5</td>
+      <td>47</td>
+      <td>373</td>
+      <td>...</td>
+      <td>7</td>
+      <td>.381</td>
+      <td>.498</td>
+      <td>.790</td>
+      <td>1.288</td>
+      <td>.530</td>
+      <td>222.3</td>
+      <td>10.71</td>
+      <td>1986-11-10</td>
+      <td>테임즈</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>03현RF</td>
+      <td>133</td>
+      <td>601</td>
+      <td>460</td>
+      <td>110</td>
+      <td>154</td>
+      <td>16</td>
+      <td>1</td>
+      <td>53</td>
+      <td>331</td>
+      <td>...</td>
+      <td>8</td>
+      <td>.335</td>
+      <td>.478</td>
+      <td>.720</td>
+      <td>1.197</td>
+      <td>.498</td>
+      <td>210.7</td>
+      <td>10.19</td>
+      <td>1975-05-05</td>
+      <td>심정수</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>97해SS</td>
+      <td>125</td>
+      <td>577</td>
+      <td>484</td>
+      <td>112</td>
+      <td>157</td>
+      <td>28</td>
+      <td>3</td>
+      <td>30</td>
+      <td>281</td>
+      <td>...</td>
+      <td>3</td>
+      <td>.324</td>
+      <td>.428</td>
+      <td>.581</td>
+      <td>1.009</td>
+      <td>.431</td>
+      <td>173.2</td>
+      <td>9.70</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>96해SS</td>
+      <td>113</td>
+      <td>525</td>
+      <td>449</td>
+      <td>94</td>
+      <td>149</td>
+      <td>28</td>
+      <td>1</td>
+      <td>25</td>
+      <td>254</td>
+      <td>...</td>
+      <td>2</td>
+      <td>.332</td>
+      <td>.425</td>
+      <td>.566</td>
+      <td>.991</td>
+      <td>.440</td>
+      <td>184.6</td>
+      <td>9.52</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>95</th>
+      <td>95한1B</td>
+      <td>126</td>
+      <td>498</td>
+      <td>420</td>
+      <td>77</td>
+      <td>137</td>
+      <td>25</td>
+      <td>4</td>
+      <td>22</td>
+      <td>236</td>
+      <td>...</td>
+      <td>4</td>
+      <td>.326</td>
+      <td>.424</td>
+      <td>.562</td>
+      <td>.986</td>
+      <td>.431</td>
+      <td>183.1</td>
+      <td>6.14</td>
+      <td>1968-04-10</td>
+      <td>장종훈</td>
+    </tr>
+    <tr>
+      <th>96</th>
+      <td>93해SS</td>
+      <td>126</td>
+      <td>525</td>
+      <td>475</td>
+      <td>85</td>
+      <td>133</td>
+      <td>16</td>
+      <td>4</td>
+      <td>16</td>
+      <td>205</td>
+      <td>...</td>
+      <td>4</td>
+      <td>.280</td>
+      <td>.331</td>
+      <td>.432</td>
+      <td>.762</td>
+      <td>.350</td>
+      <td>127.4</td>
+      <td>6.14</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+    </tr>
+    <tr>
+      <th>97</th>
+      <td>08한1B</td>
+      <td>115</td>
+      <td>484</td>
+      <td>410</td>
+      <td>81</td>
+      <td>133</td>
+      <td>27</td>
+      <td>1</td>
+      <td>31</td>
+      <td>255</td>
+      <td>...</td>
+      <td>5</td>
+      <td>.324</td>
+      <td>.417</td>
+      <td>.622</td>
+      <td>1.039</td>
+      <td>.461</td>
+      <td>183.4</td>
+      <td>6.14</td>
+      <td>1982-05-29</td>
+      <td>김태균</td>
+    </tr>
+    <tr>
+      <th>98</th>
+      <td>02두3B</td>
+      <td>120</td>
+      <td>487</td>
+      <td>415</td>
+      <td>63</td>
+      <td>132</td>
+      <td>21</td>
+      <td>0</td>
+      <td>26</td>
+      <td>231</td>
+      <td>...</td>
+      <td>7</td>
+      <td>.318</td>
+      <td>.405</td>
+      <td>.557</td>
+      <td>.961</td>
+      <td>.415</td>
+      <td>162.7</td>
+      <td>6.13</td>
+      <td>1976-02-03</td>
+      <td>김동주</td>
+    </tr>
+    <tr>
+      <th>99</th>
+      <td>00두1B</td>
+      <td>127</td>
+      <td>565</td>
+      <td>479</td>
+      <td>91</td>
+      <td>151</td>
+      <td>22</td>
+      <td>0</td>
+      <td>39</td>
+      <td>290</td>
+      <td>...</td>
+      <td>3</td>
+      <td>.315</td>
+      <td>.414</td>
+      <td>.605</td>
+      <td>1.020</td>
+      <td>.437</td>
+      <td>166.6</td>
+      <td>6.12</td>
+      <td>1969-08-19</td>
+      <td>우즈</td>
+    </tr>
+  </tbody>
+</table>
+<p>100 rows × 29 columns</p>
+</div>
+
+
+
+
+```python
+result['시즌'] = result['선수'].apply(lambda x: x[:2])
+```
+
+    /var/folders/z2/fv0pqv7s0h14c74jrrz7kv9r0000gn/T/ipykernel_1028/4287393100.py:1: SettingWithCopyWarning: 
+    A value is trying to be set on a copy of a slice from a DataFrame.
+    Try using .loc[row_indexer,col_indexer] = value instead
+    
+    See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+      result['시즌'] = result['선수'].apply(lambda x: x[:2])
+
+
+
+```python
+result
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>선수</th>
+      <th>G</th>
+      <th>타석</th>
+      <th>타수</th>
+      <th>득점</th>
+      <th>안타</th>
+      <th>2타</th>
+      <th>3타</th>
+      <th>홈런</th>
+      <th>루타</th>
+      <th>...</th>
+      <th>타율</th>
+      <th>출루</th>
+      <th>장타</th>
+      <th>OPS</th>
+      <th>wOBA</th>
+      <th>wRC+</th>
+      <th>WAR+</th>
+      <th>생일</th>
+      <th>이름</th>
+      <th>시즌</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>94해SS</td>
+      <td>124</td>
+      <td>561</td>
+      <td>499</td>
+      <td>113</td>
+      <td>196</td>
+      <td>27</td>
+      <td>5</td>
+      <td>19</td>
+      <td>290</td>
+      <td>...</td>
+      <td>.393</td>
+      <td>.452</td>
+      <td>.581</td>
+      <td>1.033</td>
+      <td>.462</td>
+      <td>198.3</td>
+      <td>11.77</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>94</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>15N1B</td>
+      <td>142</td>
+      <td>595</td>
+      <td>472</td>
+      <td>130</td>
+      <td>180</td>
+      <td>42</td>
+      <td>5</td>
+      <td>47</td>
+      <td>373</td>
+      <td>...</td>
+      <td>.381</td>
+      <td>.498</td>
+      <td>.790</td>
+      <td>1.288</td>
+      <td>.530</td>
+      <td>222.3</td>
+      <td>10.71</td>
+      <td>1986-11-10</td>
+      <td>테임즈</td>
+      <td>15</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>03현RF</td>
+      <td>133</td>
+      <td>601</td>
+      <td>460</td>
+      <td>110</td>
+      <td>154</td>
+      <td>16</td>
+      <td>1</td>
+      <td>53</td>
+      <td>331</td>
+      <td>...</td>
+      <td>.335</td>
+      <td>.478</td>
+      <td>.720</td>
+      <td>1.197</td>
+      <td>.498</td>
+      <td>210.7</td>
+      <td>10.19</td>
+      <td>1975-05-05</td>
+      <td>심정수</td>
+      <td>03</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>97해SS</td>
+      <td>125</td>
+      <td>577</td>
+      <td>484</td>
+      <td>112</td>
+      <td>157</td>
+      <td>28</td>
+      <td>3</td>
+      <td>30</td>
+      <td>281</td>
+      <td>...</td>
+      <td>.324</td>
+      <td>.428</td>
+      <td>.581</td>
+      <td>1.009</td>
+      <td>.431</td>
+      <td>173.2</td>
+      <td>9.70</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>97</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>96해SS</td>
+      <td>113</td>
+      <td>525</td>
+      <td>449</td>
+      <td>94</td>
+      <td>149</td>
+      <td>28</td>
+      <td>1</td>
+      <td>25</td>
+      <td>254</td>
+      <td>...</td>
+      <td>.332</td>
+      <td>.425</td>
+      <td>.566</td>
+      <td>.991</td>
+      <td>.440</td>
+      <td>184.6</td>
+      <td>9.52</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>96</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>95</th>
+      <td>95한1B</td>
+      <td>126</td>
+      <td>498</td>
+      <td>420</td>
+      <td>77</td>
+      <td>137</td>
+      <td>25</td>
+      <td>4</td>
+      <td>22</td>
+      <td>236</td>
+      <td>...</td>
+      <td>.326</td>
+      <td>.424</td>
+      <td>.562</td>
+      <td>.986</td>
+      <td>.431</td>
+      <td>183.1</td>
+      <td>6.14</td>
+      <td>1968-04-10</td>
+      <td>장종훈</td>
+      <td>95</td>
+    </tr>
+    <tr>
+      <th>96</th>
+      <td>93해SS</td>
+      <td>126</td>
+      <td>525</td>
+      <td>475</td>
+      <td>85</td>
+      <td>133</td>
+      <td>16</td>
+      <td>4</td>
+      <td>16</td>
+      <td>205</td>
+      <td>...</td>
+      <td>.280</td>
+      <td>.331</td>
+      <td>.432</td>
+      <td>.762</td>
+      <td>.350</td>
+      <td>127.4</td>
+      <td>6.14</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>93</td>
+    </tr>
+    <tr>
+      <th>97</th>
+      <td>08한1B</td>
+      <td>115</td>
+      <td>484</td>
+      <td>410</td>
+      <td>81</td>
+      <td>133</td>
+      <td>27</td>
+      <td>1</td>
+      <td>31</td>
+      <td>255</td>
+      <td>...</td>
+      <td>.324</td>
+      <td>.417</td>
+      <td>.622</td>
+      <td>1.039</td>
+      <td>.461</td>
+      <td>183.4</td>
+      <td>6.14</td>
+      <td>1982-05-29</td>
+      <td>김태균</td>
+      <td>08</td>
+    </tr>
+    <tr>
+      <th>98</th>
+      <td>02두3B</td>
+      <td>120</td>
+      <td>487</td>
+      <td>415</td>
+      <td>63</td>
+      <td>132</td>
+      <td>21</td>
+      <td>0</td>
+      <td>26</td>
+      <td>231</td>
+      <td>...</td>
+      <td>.318</td>
+      <td>.405</td>
+      <td>.557</td>
+      <td>.961</td>
+      <td>.415</td>
+      <td>162.7</td>
+      <td>6.13</td>
+      <td>1976-02-03</td>
+      <td>김동주</td>
+      <td>02</td>
+    </tr>
+    <tr>
+      <th>99</th>
+      <td>00두1B</td>
+      <td>127</td>
+      <td>565</td>
+      <td>479</td>
+      <td>91</td>
+      <td>151</td>
+      <td>22</td>
+      <td>0</td>
+      <td>39</td>
+      <td>290</td>
+      <td>...</td>
+      <td>.315</td>
+      <td>.414</td>
+      <td>.605</td>
+      <td>1.020</td>
+      <td>.437</td>
+      <td>166.6</td>
+      <td>6.12</td>
+      <td>1969-08-19</td>
+      <td>우즈</td>
+      <td>00</td>
+    </tr>
+  </tbody>
+</table>
+<p>100 rows × 30 columns</p>
+</div>
+
+
+
+
+```python
+result['선수'] = result.apply(lambda x: x['선수'].replace(x['시즌'],''), axis=1)
+```
+
+    /var/folders/z2/fv0pqv7s0h14c74jrrz7kv9r0000gn/T/ipykernel_1028/351928882.py:1: SettingWithCopyWarning: 
+    A value is trying to be set on a copy of a slice from a DataFrame.
+    Try using .loc[row_indexer,col_indexer] = value instead
+    
+    See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+      result['선수'] = result.apply(lambda x: x['선수'].replace(x['시즌'],''), axis=1)
+
+
+
+```python
+result
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>선수</th>
+      <th>G</th>
+      <th>타석</th>
+      <th>타수</th>
+      <th>득점</th>
+      <th>안타</th>
+      <th>2타</th>
+      <th>3타</th>
+      <th>홈런</th>
+      <th>루타</th>
+      <th>...</th>
+      <th>타율</th>
+      <th>출루</th>
+      <th>장타</th>
+      <th>OPS</th>
+      <th>wOBA</th>
+      <th>wRC+</th>
+      <th>WAR+</th>
+      <th>생일</th>
+      <th>이름</th>
+      <th>시즌</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>해SS</td>
+      <td>124</td>
+      <td>561</td>
+      <td>499</td>
+      <td>113</td>
+      <td>196</td>
+      <td>27</td>
+      <td>5</td>
+      <td>19</td>
+      <td>290</td>
+      <td>...</td>
+      <td>.393</td>
+      <td>.452</td>
+      <td>.581</td>
+      <td>1.033</td>
+      <td>.462</td>
+      <td>198.3</td>
+      <td>11.77</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>94</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>N1B</td>
+      <td>142</td>
+      <td>595</td>
+      <td>472</td>
+      <td>130</td>
+      <td>180</td>
+      <td>42</td>
+      <td>5</td>
+      <td>47</td>
+      <td>373</td>
+      <td>...</td>
+      <td>.381</td>
+      <td>.498</td>
+      <td>.790</td>
+      <td>1.288</td>
+      <td>.530</td>
+      <td>222.3</td>
+      <td>10.71</td>
+      <td>1986-11-10</td>
+      <td>테임즈</td>
+      <td>15</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>현RF</td>
+      <td>133</td>
+      <td>601</td>
+      <td>460</td>
+      <td>110</td>
+      <td>154</td>
+      <td>16</td>
+      <td>1</td>
+      <td>53</td>
+      <td>331</td>
+      <td>...</td>
+      <td>.335</td>
+      <td>.478</td>
+      <td>.720</td>
+      <td>1.197</td>
+      <td>.498</td>
+      <td>210.7</td>
+      <td>10.19</td>
+      <td>1975-05-05</td>
+      <td>심정수</td>
+      <td>03</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>해SS</td>
+      <td>125</td>
+      <td>577</td>
+      <td>484</td>
+      <td>112</td>
+      <td>157</td>
+      <td>28</td>
+      <td>3</td>
+      <td>30</td>
+      <td>281</td>
+      <td>...</td>
+      <td>.324</td>
+      <td>.428</td>
+      <td>.581</td>
+      <td>1.009</td>
+      <td>.431</td>
+      <td>173.2</td>
+      <td>9.70</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>97</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>해SS</td>
+      <td>113</td>
+      <td>525</td>
+      <td>449</td>
+      <td>94</td>
+      <td>149</td>
+      <td>28</td>
+      <td>1</td>
+      <td>25</td>
+      <td>254</td>
+      <td>...</td>
+      <td>.332</td>
+      <td>.425</td>
+      <td>.566</td>
+      <td>.991</td>
+      <td>.440</td>
+      <td>184.6</td>
+      <td>9.52</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>96</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>95</th>
+      <td>한1B</td>
+      <td>126</td>
+      <td>498</td>
+      <td>420</td>
+      <td>77</td>
+      <td>137</td>
+      <td>25</td>
+      <td>4</td>
+      <td>22</td>
+      <td>236</td>
+      <td>...</td>
+      <td>.326</td>
+      <td>.424</td>
+      <td>.562</td>
+      <td>.986</td>
+      <td>.431</td>
+      <td>183.1</td>
+      <td>6.14</td>
+      <td>1968-04-10</td>
+      <td>장종훈</td>
+      <td>95</td>
+    </tr>
+    <tr>
+      <th>96</th>
+      <td>해SS</td>
+      <td>126</td>
+      <td>525</td>
+      <td>475</td>
+      <td>85</td>
+      <td>133</td>
+      <td>16</td>
+      <td>4</td>
+      <td>16</td>
+      <td>205</td>
+      <td>...</td>
+      <td>.280</td>
+      <td>.331</td>
+      <td>.432</td>
+      <td>.762</td>
+      <td>.350</td>
+      <td>127.4</td>
+      <td>6.14</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>93</td>
+    </tr>
+    <tr>
+      <th>97</th>
+      <td>한1B</td>
+      <td>115</td>
+      <td>484</td>
+      <td>410</td>
+      <td>81</td>
+      <td>133</td>
+      <td>27</td>
+      <td>1</td>
+      <td>31</td>
+      <td>255</td>
+      <td>...</td>
+      <td>.324</td>
+      <td>.417</td>
+      <td>.622</td>
+      <td>1.039</td>
+      <td>.461</td>
+      <td>183.4</td>
+      <td>6.14</td>
+      <td>1982-05-29</td>
+      <td>김태균</td>
+      <td>08</td>
+    </tr>
+    <tr>
+      <th>98</th>
+      <td>두3B</td>
+      <td>120</td>
+      <td>487</td>
+      <td>415</td>
+      <td>63</td>
+      <td>132</td>
+      <td>21</td>
+      <td>0</td>
+      <td>26</td>
+      <td>231</td>
+      <td>...</td>
+      <td>.318</td>
+      <td>.405</td>
+      <td>.557</td>
+      <td>.961</td>
+      <td>.415</td>
+      <td>162.7</td>
+      <td>6.13</td>
+      <td>1976-02-03</td>
+      <td>김동주</td>
+      <td>02</td>
+    </tr>
+    <tr>
+      <th>99</th>
+      <td>두1B</td>
+      <td>127</td>
+      <td>565</td>
+      <td>479</td>
+      <td>91</td>
+      <td>151</td>
+      <td>22</td>
+      <td>0</td>
+      <td>39</td>
+      <td>290</td>
+      <td>...</td>
+      <td>.315</td>
+      <td>.414</td>
+      <td>.605</td>
+      <td>1.020</td>
+      <td>.437</td>
+      <td>166.6</td>
+      <td>6.12</td>
+      <td>1969-08-19</td>
+      <td>우즈</td>
+      <td>00</td>
+    </tr>
+  </tbody>
+</table>
+<p>100 rows × 30 columns</p>
+</div>
+
+
+
+
+```python
+result['시즌'] = result['시즌'].apply(lambda x: int("20"+ x) if int(x) < 30 else int("19"+x))
+```
+
+    /var/folders/z2/fv0pqv7s0h14c74jrrz7kv9r0000gn/T/ipykernel_1028/3457384032.py:1: SettingWithCopyWarning: 
+    A value is trying to be set on a copy of a slice from a DataFrame.
+    Try using .loc[row_indexer,col_indexer] = value instead
+    
+    See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+      result['시즌'] = result['시즌'].apply(lambda x: int("20"+ x) if int(x) < 30 else int("19"+x))
+
+
+
+```python
+result
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>선수</th>
+      <th>G</th>
+      <th>타석</th>
+      <th>타수</th>
+      <th>득점</th>
+      <th>안타</th>
+      <th>2타</th>
+      <th>3타</th>
+      <th>홈런</th>
+      <th>루타</th>
+      <th>...</th>
+      <th>타율</th>
+      <th>출루</th>
+      <th>장타</th>
+      <th>OPS</th>
+      <th>wOBA</th>
+      <th>wRC+</th>
+      <th>WAR+</th>
+      <th>생일</th>
+      <th>이름</th>
+      <th>시즌</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>해SS</td>
+      <td>124</td>
+      <td>561</td>
+      <td>499</td>
+      <td>113</td>
+      <td>196</td>
+      <td>27</td>
+      <td>5</td>
+      <td>19</td>
+      <td>290</td>
+      <td>...</td>
+      <td>.393</td>
+      <td>.452</td>
+      <td>.581</td>
+      <td>1.033</td>
+      <td>.462</td>
+      <td>198.3</td>
+      <td>11.77</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1994</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>N1B</td>
+      <td>142</td>
+      <td>595</td>
+      <td>472</td>
+      <td>130</td>
+      <td>180</td>
+      <td>42</td>
+      <td>5</td>
+      <td>47</td>
+      <td>373</td>
+      <td>...</td>
+      <td>.381</td>
+      <td>.498</td>
+      <td>.790</td>
+      <td>1.288</td>
+      <td>.530</td>
+      <td>222.3</td>
+      <td>10.71</td>
+      <td>1986-11-10</td>
+      <td>테임즈</td>
+      <td>2015</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>현RF</td>
+      <td>133</td>
+      <td>601</td>
+      <td>460</td>
+      <td>110</td>
+      <td>154</td>
+      <td>16</td>
+      <td>1</td>
+      <td>53</td>
+      <td>331</td>
+      <td>...</td>
+      <td>.335</td>
+      <td>.478</td>
+      <td>.720</td>
+      <td>1.197</td>
+      <td>.498</td>
+      <td>210.7</td>
+      <td>10.19</td>
+      <td>1975-05-05</td>
+      <td>심정수</td>
+      <td>2003</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>해SS</td>
+      <td>125</td>
+      <td>577</td>
+      <td>484</td>
+      <td>112</td>
+      <td>157</td>
+      <td>28</td>
+      <td>3</td>
+      <td>30</td>
+      <td>281</td>
+      <td>...</td>
+      <td>.324</td>
+      <td>.428</td>
+      <td>.581</td>
+      <td>1.009</td>
+      <td>.431</td>
+      <td>173.2</td>
+      <td>9.70</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1997</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>해SS</td>
+      <td>113</td>
+      <td>525</td>
+      <td>449</td>
+      <td>94</td>
+      <td>149</td>
+      <td>28</td>
+      <td>1</td>
+      <td>25</td>
+      <td>254</td>
+      <td>...</td>
+      <td>.332</td>
+      <td>.425</td>
+      <td>.566</td>
+      <td>.991</td>
+      <td>.440</td>
+      <td>184.6</td>
+      <td>9.52</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1996</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>95</th>
+      <td>한1B</td>
+      <td>126</td>
+      <td>498</td>
+      <td>420</td>
+      <td>77</td>
+      <td>137</td>
+      <td>25</td>
+      <td>4</td>
+      <td>22</td>
+      <td>236</td>
+      <td>...</td>
+      <td>.326</td>
+      <td>.424</td>
+      <td>.562</td>
+      <td>.986</td>
+      <td>.431</td>
+      <td>183.1</td>
+      <td>6.14</td>
+      <td>1968-04-10</td>
+      <td>장종훈</td>
+      <td>1995</td>
+    </tr>
+    <tr>
+      <th>96</th>
+      <td>해SS</td>
+      <td>126</td>
+      <td>525</td>
+      <td>475</td>
+      <td>85</td>
+      <td>133</td>
+      <td>16</td>
+      <td>4</td>
+      <td>16</td>
+      <td>205</td>
+      <td>...</td>
+      <td>.280</td>
+      <td>.331</td>
+      <td>.432</td>
+      <td>.762</td>
+      <td>.350</td>
+      <td>127.4</td>
+      <td>6.14</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1993</td>
+    </tr>
+    <tr>
+      <th>97</th>
+      <td>한1B</td>
+      <td>115</td>
+      <td>484</td>
+      <td>410</td>
+      <td>81</td>
+      <td>133</td>
+      <td>27</td>
+      <td>1</td>
+      <td>31</td>
+      <td>255</td>
+      <td>...</td>
+      <td>.324</td>
+      <td>.417</td>
+      <td>.622</td>
+      <td>1.039</td>
+      <td>.461</td>
+      <td>183.4</td>
+      <td>6.14</td>
+      <td>1982-05-29</td>
+      <td>김태균</td>
+      <td>2008</td>
+    </tr>
+    <tr>
+      <th>98</th>
+      <td>두3B</td>
+      <td>120</td>
+      <td>487</td>
+      <td>415</td>
+      <td>63</td>
+      <td>132</td>
+      <td>21</td>
+      <td>0</td>
+      <td>26</td>
+      <td>231</td>
+      <td>...</td>
+      <td>.318</td>
+      <td>.405</td>
+      <td>.557</td>
+      <td>.961</td>
+      <td>.415</td>
+      <td>162.7</td>
+      <td>6.13</td>
+      <td>1976-02-03</td>
+      <td>김동주</td>
+      <td>2002</td>
+    </tr>
+    <tr>
+      <th>99</th>
+      <td>두1B</td>
+      <td>127</td>
+      <td>565</td>
+      <td>479</td>
+      <td>91</td>
+      <td>151</td>
+      <td>22</td>
+      <td>0</td>
+      <td>39</td>
+      <td>290</td>
+      <td>...</td>
+      <td>.315</td>
+      <td>.414</td>
+      <td>.605</td>
+      <td>1.020</td>
+      <td>.437</td>
+      <td>166.6</td>
+      <td>6.12</td>
+      <td>1969-08-19</td>
+      <td>우즈</td>
+      <td>2000</td>
+    </tr>
+  </tbody>
+</table>
+<p>100 rows × 30 columns</p>
+</div>
+
+
+
+
+```python
+position = ['1B', '2B', '3B', 'SS', 'C', 'RF', 'LF', 'CF', 'DH'] 
+
+result['포지션여부'] = result['선수'].apply(lambda x : (np.isin(x[-2:], position) or np.isin(x[-1:], position))) 
+```
+
+    /var/folders/z2/fv0pqv7s0h14c74jrrz7kv9r0000gn/T/ipykernel_1028/1436672241.py:3: SettingWithCopyWarning: 
+    A value is trying to be set on a copy of a slice from a DataFrame.
+    Try using .loc[row_indexer,col_indexer] = value instead
+    
+    See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+      result['포지션여부'] = result['선수'].apply(lambda x : (np.isin(x[-2:], position) or np.isin(x[-1:], position)))
+
+
+
+```python
+result
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>선수</th>
+      <th>G</th>
+      <th>타석</th>
+      <th>타수</th>
+      <th>득점</th>
+      <th>안타</th>
+      <th>2타</th>
+      <th>3타</th>
+      <th>홈런</th>
+      <th>루타</th>
+      <th>...</th>
+      <th>출루</th>
+      <th>장타</th>
+      <th>OPS</th>
+      <th>wOBA</th>
+      <th>wRC+</th>
+      <th>WAR+</th>
+      <th>생일</th>
+      <th>이름</th>
+      <th>시즌</th>
+      <th>포지션여부</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>해SS</td>
+      <td>124</td>
+      <td>561</td>
+      <td>499</td>
+      <td>113</td>
+      <td>196</td>
+      <td>27</td>
+      <td>5</td>
+      <td>19</td>
+      <td>290</td>
+      <td>...</td>
+      <td>.452</td>
+      <td>.581</td>
+      <td>1.033</td>
+      <td>.462</td>
+      <td>198.3</td>
+      <td>11.77</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1994</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>N1B</td>
+      <td>142</td>
+      <td>595</td>
+      <td>472</td>
+      <td>130</td>
+      <td>180</td>
+      <td>42</td>
+      <td>5</td>
+      <td>47</td>
+      <td>373</td>
+      <td>...</td>
+      <td>.498</td>
+      <td>.790</td>
+      <td>1.288</td>
+      <td>.530</td>
+      <td>222.3</td>
+      <td>10.71</td>
+      <td>1986-11-10</td>
+      <td>테임즈</td>
+      <td>2015</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>현RF</td>
+      <td>133</td>
+      <td>601</td>
+      <td>460</td>
+      <td>110</td>
+      <td>154</td>
+      <td>16</td>
+      <td>1</td>
+      <td>53</td>
+      <td>331</td>
+      <td>...</td>
+      <td>.478</td>
+      <td>.720</td>
+      <td>1.197</td>
+      <td>.498</td>
+      <td>210.7</td>
+      <td>10.19</td>
+      <td>1975-05-05</td>
+      <td>심정수</td>
+      <td>2003</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>해SS</td>
+      <td>125</td>
+      <td>577</td>
+      <td>484</td>
+      <td>112</td>
+      <td>157</td>
+      <td>28</td>
+      <td>3</td>
+      <td>30</td>
+      <td>281</td>
+      <td>...</td>
+      <td>.428</td>
+      <td>.581</td>
+      <td>1.009</td>
+      <td>.431</td>
+      <td>173.2</td>
+      <td>9.70</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1997</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>해SS</td>
+      <td>113</td>
+      <td>525</td>
+      <td>449</td>
+      <td>94</td>
+      <td>149</td>
+      <td>28</td>
+      <td>1</td>
+      <td>25</td>
+      <td>254</td>
+      <td>...</td>
+      <td>.425</td>
+      <td>.566</td>
+      <td>.991</td>
+      <td>.440</td>
+      <td>184.6</td>
+      <td>9.52</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1996</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>95</th>
+      <td>한1B</td>
+      <td>126</td>
+      <td>498</td>
+      <td>420</td>
+      <td>77</td>
+      <td>137</td>
+      <td>25</td>
+      <td>4</td>
+      <td>22</td>
+      <td>236</td>
+      <td>...</td>
+      <td>.424</td>
+      <td>.562</td>
+      <td>.986</td>
+      <td>.431</td>
+      <td>183.1</td>
+      <td>6.14</td>
+      <td>1968-04-10</td>
+      <td>장종훈</td>
+      <td>1995</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>96</th>
+      <td>해SS</td>
+      <td>126</td>
+      <td>525</td>
+      <td>475</td>
+      <td>85</td>
+      <td>133</td>
+      <td>16</td>
+      <td>4</td>
+      <td>16</td>
+      <td>205</td>
+      <td>...</td>
+      <td>.331</td>
+      <td>.432</td>
+      <td>.762</td>
+      <td>.350</td>
+      <td>127.4</td>
+      <td>6.14</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1993</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>97</th>
+      <td>한1B</td>
+      <td>115</td>
+      <td>484</td>
+      <td>410</td>
+      <td>81</td>
+      <td>133</td>
+      <td>27</td>
+      <td>1</td>
+      <td>31</td>
+      <td>255</td>
+      <td>...</td>
+      <td>.417</td>
+      <td>.622</td>
+      <td>1.039</td>
+      <td>.461</td>
+      <td>183.4</td>
+      <td>6.14</td>
+      <td>1982-05-29</td>
+      <td>김태균</td>
+      <td>2008</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>98</th>
+      <td>두3B</td>
+      <td>120</td>
+      <td>487</td>
+      <td>415</td>
+      <td>63</td>
+      <td>132</td>
+      <td>21</td>
+      <td>0</td>
+      <td>26</td>
+      <td>231</td>
+      <td>...</td>
+      <td>.405</td>
+      <td>.557</td>
+      <td>.961</td>
+      <td>.415</td>
+      <td>162.7</td>
+      <td>6.13</td>
+      <td>1976-02-03</td>
+      <td>김동주</td>
+      <td>2002</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>99</th>
+      <td>두1B</td>
+      <td>127</td>
+      <td>565</td>
+      <td>479</td>
+      <td>91</td>
+      <td>151</td>
+      <td>22</td>
+      <td>0</td>
+      <td>39</td>
+      <td>290</td>
+      <td>...</td>
+      <td>.414</td>
+      <td>.605</td>
+      <td>1.020</td>
+      <td>.437</td>
+      <td>166.6</td>
+      <td>6.12</td>
+      <td>1969-08-19</td>
+      <td>우즈</td>
+      <td>2000</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+<p>100 rows × 31 columns</p>
+</div>
+
+
+
+
+```python
+result['포지션'] = result['선수'].apply(lambda x: x[-2:] if x[-2:] in position else x[-1:])
+```
+
+    /var/folders/z2/fv0pqv7s0h14c74jrrz7kv9r0000gn/T/ipykernel_1028/2372372528.py:1: SettingWithCopyWarning: 
+    A value is trying to be set on a copy of a slice from a DataFrame.
+    Try using .loc[row_indexer,col_indexer] = value instead
+    
+    See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+      result['포지션'] = result['선수'].apply(lambda x: x[-2:] if x[-2:] in position else x[-1:])
+
+
+
+```python
+result
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>선수</th>
+      <th>G</th>
+      <th>타석</th>
+      <th>타수</th>
+      <th>득점</th>
+      <th>안타</th>
+      <th>2타</th>
+      <th>3타</th>
+      <th>홈런</th>
+      <th>루타</th>
+      <th>...</th>
+      <th>장타</th>
+      <th>OPS</th>
+      <th>wOBA</th>
+      <th>wRC+</th>
+      <th>WAR+</th>
+      <th>생일</th>
+      <th>이름</th>
+      <th>시즌</th>
+      <th>포지션여부</th>
+      <th>포지션</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>해SS</td>
+      <td>124</td>
+      <td>561</td>
+      <td>499</td>
+      <td>113</td>
+      <td>196</td>
+      <td>27</td>
+      <td>5</td>
+      <td>19</td>
+      <td>290</td>
+      <td>...</td>
+      <td>.581</td>
+      <td>1.033</td>
+      <td>.462</td>
+      <td>198.3</td>
+      <td>11.77</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1994</td>
+      <td>True</td>
+      <td>SS</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>N1B</td>
+      <td>142</td>
+      <td>595</td>
+      <td>472</td>
+      <td>130</td>
+      <td>180</td>
+      <td>42</td>
+      <td>5</td>
+      <td>47</td>
+      <td>373</td>
+      <td>...</td>
+      <td>.790</td>
+      <td>1.288</td>
+      <td>.530</td>
+      <td>222.3</td>
+      <td>10.71</td>
+      <td>1986-11-10</td>
+      <td>테임즈</td>
+      <td>2015</td>
+      <td>True</td>
+      <td>1B</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>현RF</td>
+      <td>133</td>
+      <td>601</td>
+      <td>460</td>
+      <td>110</td>
+      <td>154</td>
+      <td>16</td>
+      <td>1</td>
+      <td>53</td>
+      <td>331</td>
+      <td>...</td>
+      <td>.720</td>
+      <td>1.197</td>
+      <td>.498</td>
+      <td>210.7</td>
+      <td>10.19</td>
+      <td>1975-05-05</td>
+      <td>심정수</td>
+      <td>2003</td>
+      <td>True</td>
+      <td>RF</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>해SS</td>
+      <td>125</td>
+      <td>577</td>
+      <td>484</td>
+      <td>112</td>
+      <td>157</td>
+      <td>28</td>
+      <td>3</td>
+      <td>30</td>
+      <td>281</td>
+      <td>...</td>
+      <td>.581</td>
+      <td>1.009</td>
+      <td>.431</td>
+      <td>173.2</td>
+      <td>9.70</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1997</td>
+      <td>True</td>
+      <td>SS</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>해SS</td>
+      <td>113</td>
+      <td>525</td>
+      <td>449</td>
+      <td>94</td>
+      <td>149</td>
+      <td>28</td>
+      <td>1</td>
+      <td>25</td>
+      <td>254</td>
+      <td>...</td>
+      <td>.566</td>
+      <td>.991</td>
+      <td>.440</td>
+      <td>184.6</td>
+      <td>9.52</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1996</td>
+      <td>True</td>
+      <td>SS</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>95</th>
+      <td>한1B</td>
+      <td>126</td>
+      <td>498</td>
+      <td>420</td>
+      <td>77</td>
+      <td>137</td>
+      <td>25</td>
+      <td>4</td>
+      <td>22</td>
+      <td>236</td>
+      <td>...</td>
+      <td>.562</td>
+      <td>.986</td>
+      <td>.431</td>
+      <td>183.1</td>
+      <td>6.14</td>
+      <td>1968-04-10</td>
+      <td>장종훈</td>
+      <td>1995</td>
+      <td>True</td>
+      <td>1B</td>
+    </tr>
+    <tr>
+      <th>96</th>
+      <td>해SS</td>
+      <td>126</td>
+      <td>525</td>
+      <td>475</td>
+      <td>85</td>
+      <td>133</td>
+      <td>16</td>
+      <td>4</td>
+      <td>16</td>
+      <td>205</td>
+      <td>...</td>
+      <td>.432</td>
+      <td>.762</td>
+      <td>.350</td>
+      <td>127.4</td>
+      <td>6.14</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1993</td>
+      <td>True</td>
+      <td>SS</td>
+    </tr>
+    <tr>
+      <th>97</th>
+      <td>한1B</td>
+      <td>115</td>
+      <td>484</td>
+      <td>410</td>
+      <td>81</td>
+      <td>133</td>
+      <td>27</td>
+      <td>1</td>
+      <td>31</td>
+      <td>255</td>
+      <td>...</td>
+      <td>.622</td>
+      <td>1.039</td>
+      <td>.461</td>
+      <td>183.4</td>
+      <td>6.14</td>
+      <td>1982-05-29</td>
+      <td>김태균</td>
+      <td>2008</td>
+      <td>True</td>
+      <td>1B</td>
+    </tr>
+    <tr>
+      <th>98</th>
+      <td>두3B</td>
+      <td>120</td>
+      <td>487</td>
+      <td>415</td>
+      <td>63</td>
+      <td>132</td>
+      <td>21</td>
+      <td>0</td>
+      <td>26</td>
+      <td>231</td>
+      <td>...</td>
+      <td>.557</td>
+      <td>.961</td>
+      <td>.415</td>
+      <td>162.7</td>
+      <td>6.13</td>
+      <td>1976-02-03</td>
+      <td>김동주</td>
+      <td>2002</td>
+      <td>True</td>
+      <td>3B</td>
+    </tr>
+    <tr>
+      <th>99</th>
+      <td>두1B</td>
+      <td>127</td>
+      <td>565</td>
+      <td>479</td>
+      <td>91</td>
+      <td>151</td>
+      <td>22</td>
+      <td>0</td>
+      <td>39</td>
+      <td>290</td>
+      <td>...</td>
+      <td>.605</td>
+      <td>1.020</td>
+      <td>.437</td>
+      <td>166.6</td>
+      <td>6.12</td>
+      <td>1969-08-19</td>
+      <td>우즈</td>
+      <td>2000</td>
+      <td>True</td>
+      <td>1B</td>
+    </tr>
+  </tbody>
+</table>
+<p>100 rows × 32 columns</p>
+</div>
+
+
+
+
+```python
+result.loc[result['포지션여부']==False, '포지션'] = np.nan
+```
+
+
+```python
+result
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>선수</th>
+      <th>G</th>
+      <th>타석</th>
+      <th>타수</th>
+      <th>득점</th>
+      <th>안타</th>
+      <th>2타</th>
+      <th>3타</th>
+      <th>홈런</th>
+      <th>루타</th>
+      <th>...</th>
+      <th>장타</th>
+      <th>OPS</th>
+      <th>wOBA</th>
+      <th>wRC+</th>
+      <th>WAR+</th>
+      <th>생일</th>
+      <th>이름</th>
+      <th>시즌</th>
+      <th>포지션여부</th>
+      <th>포지션</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>해SS</td>
+      <td>124</td>
+      <td>561</td>
+      <td>499</td>
+      <td>113</td>
+      <td>196</td>
+      <td>27</td>
+      <td>5</td>
+      <td>19</td>
+      <td>290</td>
+      <td>...</td>
+      <td>.581</td>
+      <td>1.033</td>
+      <td>.462</td>
+      <td>198.3</td>
+      <td>11.77</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1994</td>
+      <td>True</td>
+      <td>SS</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>N1B</td>
+      <td>142</td>
+      <td>595</td>
+      <td>472</td>
+      <td>130</td>
+      <td>180</td>
+      <td>42</td>
+      <td>5</td>
+      <td>47</td>
+      <td>373</td>
+      <td>...</td>
+      <td>.790</td>
+      <td>1.288</td>
+      <td>.530</td>
+      <td>222.3</td>
+      <td>10.71</td>
+      <td>1986-11-10</td>
+      <td>테임즈</td>
+      <td>2015</td>
+      <td>True</td>
+      <td>1B</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>현RF</td>
+      <td>133</td>
+      <td>601</td>
+      <td>460</td>
+      <td>110</td>
+      <td>154</td>
+      <td>16</td>
+      <td>1</td>
+      <td>53</td>
+      <td>331</td>
+      <td>...</td>
+      <td>.720</td>
+      <td>1.197</td>
+      <td>.498</td>
+      <td>210.7</td>
+      <td>10.19</td>
+      <td>1975-05-05</td>
+      <td>심정수</td>
+      <td>2003</td>
+      <td>True</td>
+      <td>RF</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>해SS</td>
+      <td>125</td>
+      <td>577</td>
+      <td>484</td>
+      <td>112</td>
+      <td>157</td>
+      <td>28</td>
+      <td>3</td>
+      <td>30</td>
+      <td>281</td>
+      <td>...</td>
+      <td>.581</td>
+      <td>1.009</td>
+      <td>.431</td>
+      <td>173.2</td>
+      <td>9.70</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1997</td>
+      <td>True</td>
+      <td>SS</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>해SS</td>
+      <td>113</td>
+      <td>525</td>
+      <td>449</td>
+      <td>94</td>
+      <td>149</td>
+      <td>28</td>
+      <td>1</td>
+      <td>25</td>
+      <td>254</td>
+      <td>...</td>
+      <td>.566</td>
+      <td>.991</td>
+      <td>.440</td>
+      <td>184.6</td>
+      <td>9.52</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1996</td>
+      <td>True</td>
+      <td>SS</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>95</th>
+      <td>한1B</td>
+      <td>126</td>
+      <td>498</td>
+      <td>420</td>
+      <td>77</td>
+      <td>137</td>
+      <td>25</td>
+      <td>4</td>
+      <td>22</td>
+      <td>236</td>
+      <td>...</td>
+      <td>.562</td>
+      <td>.986</td>
+      <td>.431</td>
+      <td>183.1</td>
+      <td>6.14</td>
+      <td>1968-04-10</td>
+      <td>장종훈</td>
+      <td>1995</td>
+      <td>True</td>
+      <td>1B</td>
+    </tr>
+    <tr>
+      <th>96</th>
+      <td>해SS</td>
+      <td>126</td>
+      <td>525</td>
+      <td>475</td>
+      <td>85</td>
+      <td>133</td>
+      <td>16</td>
+      <td>4</td>
+      <td>16</td>
+      <td>205</td>
+      <td>...</td>
+      <td>.432</td>
+      <td>.762</td>
+      <td>.350</td>
+      <td>127.4</td>
+      <td>6.14</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1993</td>
+      <td>True</td>
+      <td>SS</td>
+    </tr>
+    <tr>
+      <th>97</th>
+      <td>한1B</td>
+      <td>115</td>
+      <td>484</td>
+      <td>410</td>
+      <td>81</td>
+      <td>133</td>
+      <td>27</td>
+      <td>1</td>
+      <td>31</td>
+      <td>255</td>
+      <td>...</td>
+      <td>.622</td>
+      <td>1.039</td>
+      <td>.461</td>
+      <td>183.4</td>
+      <td>6.14</td>
+      <td>1982-05-29</td>
+      <td>김태균</td>
+      <td>2008</td>
+      <td>True</td>
+      <td>1B</td>
+    </tr>
+    <tr>
+      <th>98</th>
+      <td>두3B</td>
+      <td>120</td>
+      <td>487</td>
+      <td>415</td>
+      <td>63</td>
+      <td>132</td>
+      <td>21</td>
+      <td>0</td>
+      <td>26</td>
+      <td>231</td>
+      <td>...</td>
+      <td>.557</td>
+      <td>.961</td>
+      <td>.415</td>
+      <td>162.7</td>
+      <td>6.13</td>
+      <td>1976-02-03</td>
+      <td>김동주</td>
+      <td>2002</td>
+      <td>True</td>
+      <td>3B</td>
+    </tr>
+    <tr>
+      <th>99</th>
+      <td>두1B</td>
+      <td>127</td>
+      <td>565</td>
+      <td>479</td>
+      <td>91</td>
+      <td>151</td>
+      <td>22</td>
+      <td>0</td>
+      <td>39</td>
+      <td>290</td>
+      <td>...</td>
+      <td>.605</td>
+      <td>1.020</td>
+      <td>.437</td>
+      <td>166.6</td>
+      <td>6.12</td>
+      <td>1969-08-19</td>
+      <td>우즈</td>
+      <td>2000</td>
+      <td>True</td>
+      <td>1B</td>
+    </tr>
+  </tbody>
+</table>
+<p>100 rows × 32 columns</p>
+</div>
+
+
+
+
+```python
+result.to_excel("result.xlsx", index=False)
+```
+
+
+```python
+result['팀'] = result.apply(lambda x: x['선수'].replace(x['포지션'],'') if type(x['포지션'])==str else x['선수'], axis=1)
+result['나이'] = result.apply(lambda x: x['시즌'] - int(x['생일'][:4]) + 1, axis=1)
+```
+
+    /var/folders/z2/fv0pqv7s0h14c74jrrz7kv9r0000gn/T/ipykernel_1028/3132922972.py:1: SettingWithCopyWarning: 
+    A value is trying to be set on a copy of a slice from a DataFrame.
+    Try using .loc[row_indexer,col_indexer] = value instead
+    
+    See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+      result['팀'] = result.apply(lambda x: x['선수'].replace(x['포지션'],'') if type(x['포지션'])==str else x['선수'], axis=1)
+    /var/folders/z2/fv0pqv7s0h14c74jrrz7kv9r0000gn/T/ipykernel_1028/3132922972.py:2: SettingWithCopyWarning: 
+    A value is trying to be set on a copy of a slice from a DataFrame.
+    Try using .loc[row_indexer,col_indexer] = value instead
+    
+    See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+      result['나이'] = result.apply(lambda x: x['시즌'] - int(x['생일'][:4]) + 1, axis=1)
+
+
+
+```python
+result
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>선수</th>
+      <th>G</th>
+      <th>타석</th>
+      <th>타수</th>
+      <th>득점</th>
+      <th>안타</th>
+      <th>2타</th>
+      <th>3타</th>
+      <th>홈런</th>
+      <th>루타</th>
+      <th>...</th>
+      <th>wOBA</th>
+      <th>wRC+</th>
+      <th>WAR+</th>
+      <th>생일</th>
+      <th>이름</th>
+      <th>시즌</th>
+      <th>포지션여부</th>
+      <th>포지션</th>
+      <th>팀</th>
+      <th>나이</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>해SS</td>
+      <td>124</td>
+      <td>561</td>
+      <td>499</td>
+      <td>113</td>
+      <td>196</td>
+      <td>27</td>
+      <td>5</td>
+      <td>19</td>
+      <td>290</td>
+      <td>...</td>
+      <td>.462</td>
+      <td>198.3</td>
+      <td>11.77</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1994</td>
+      <td>True</td>
+      <td>SS</td>
+      <td>해</td>
+      <td>25</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>N1B</td>
+      <td>142</td>
+      <td>595</td>
+      <td>472</td>
+      <td>130</td>
+      <td>180</td>
+      <td>42</td>
+      <td>5</td>
+      <td>47</td>
+      <td>373</td>
+      <td>...</td>
+      <td>.530</td>
+      <td>222.3</td>
+      <td>10.71</td>
+      <td>1986-11-10</td>
+      <td>테임즈</td>
+      <td>2015</td>
+      <td>True</td>
+      <td>1B</td>
+      <td>N</td>
+      <td>30</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>현RF</td>
+      <td>133</td>
+      <td>601</td>
+      <td>460</td>
+      <td>110</td>
+      <td>154</td>
+      <td>16</td>
+      <td>1</td>
+      <td>53</td>
+      <td>331</td>
+      <td>...</td>
+      <td>.498</td>
+      <td>210.7</td>
+      <td>10.19</td>
+      <td>1975-05-05</td>
+      <td>심정수</td>
+      <td>2003</td>
+      <td>True</td>
+      <td>RF</td>
+      <td>현</td>
+      <td>29</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>해SS</td>
+      <td>125</td>
+      <td>577</td>
+      <td>484</td>
+      <td>112</td>
+      <td>157</td>
+      <td>28</td>
+      <td>3</td>
+      <td>30</td>
+      <td>281</td>
+      <td>...</td>
+      <td>.431</td>
+      <td>173.2</td>
+      <td>9.70</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1997</td>
+      <td>True</td>
+      <td>SS</td>
+      <td>해</td>
+      <td>28</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>해SS</td>
+      <td>113</td>
+      <td>525</td>
+      <td>449</td>
+      <td>94</td>
+      <td>149</td>
+      <td>28</td>
+      <td>1</td>
+      <td>25</td>
+      <td>254</td>
+      <td>...</td>
+      <td>.440</td>
+      <td>184.6</td>
+      <td>9.52</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1996</td>
+      <td>True</td>
+      <td>SS</td>
+      <td>해</td>
+      <td>27</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>95</th>
+      <td>한1B</td>
+      <td>126</td>
+      <td>498</td>
+      <td>420</td>
+      <td>77</td>
+      <td>137</td>
+      <td>25</td>
+      <td>4</td>
+      <td>22</td>
+      <td>236</td>
+      <td>...</td>
+      <td>.431</td>
+      <td>183.1</td>
+      <td>6.14</td>
+      <td>1968-04-10</td>
+      <td>장종훈</td>
+      <td>1995</td>
+      <td>True</td>
+      <td>1B</td>
+      <td>한</td>
+      <td>28</td>
+    </tr>
+    <tr>
+      <th>96</th>
+      <td>해SS</td>
+      <td>126</td>
+      <td>525</td>
+      <td>475</td>
+      <td>85</td>
+      <td>133</td>
+      <td>16</td>
+      <td>4</td>
+      <td>16</td>
+      <td>205</td>
+      <td>...</td>
+      <td>.350</td>
+      <td>127.4</td>
+      <td>6.14</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1993</td>
+      <td>True</td>
+      <td>SS</td>
+      <td>해</td>
+      <td>24</td>
+    </tr>
+    <tr>
+      <th>97</th>
+      <td>한1B</td>
+      <td>115</td>
+      <td>484</td>
+      <td>410</td>
+      <td>81</td>
+      <td>133</td>
+      <td>27</td>
+      <td>1</td>
+      <td>31</td>
+      <td>255</td>
+      <td>...</td>
+      <td>.461</td>
+      <td>183.4</td>
+      <td>6.14</td>
+      <td>1982-05-29</td>
+      <td>김태균</td>
+      <td>2008</td>
+      <td>True</td>
+      <td>1B</td>
+      <td>한</td>
+      <td>27</td>
+    </tr>
+    <tr>
+      <th>98</th>
+      <td>두3B</td>
+      <td>120</td>
+      <td>487</td>
+      <td>415</td>
+      <td>63</td>
+      <td>132</td>
+      <td>21</td>
+      <td>0</td>
+      <td>26</td>
+      <td>231</td>
+      <td>...</td>
+      <td>.415</td>
+      <td>162.7</td>
+      <td>6.13</td>
+      <td>1976-02-03</td>
+      <td>김동주</td>
+      <td>2002</td>
+      <td>True</td>
+      <td>3B</td>
+      <td>두</td>
+      <td>27</td>
+    </tr>
+    <tr>
+      <th>99</th>
+      <td>두1B</td>
+      <td>127</td>
+      <td>565</td>
+      <td>479</td>
+      <td>91</td>
+      <td>151</td>
+      <td>22</td>
+      <td>0</td>
+      <td>39</td>
+      <td>290</td>
+      <td>...</td>
+      <td>.437</td>
+      <td>166.6</td>
+      <td>6.12</td>
+      <td>1969-08-19</td>
+      <td>우즈</td>
+      <td>2000</td>
+      <td>True</td>
+      <td>1B</td>
+      <td>두</td>
+      <td>32</td>
+    </tr>
+  </tbody>
+</table>
+<p>100 rows × 34 columns</p>
+</div>
+
+
+
+
+```python
+info = result[['이름', '생일']].apply(lambda x: tuple(x), axis=1)
+```
+
+
+```python
+info
+```
+
+
+
+
+    0     (이종범, 1970-08-15)
+    1     (테임즈, 1986-11-10)
+    2     (심정수, 1975-05-05)
+    3     (이종범, 1970-08-15)
+    4     (이종범, 1970-08-15)
+                ...        
+    95    (장종훈, 1968-04-10)
+    96    (이종범, 1970-08-15)
+    97    (김태균, 1982-05-29)
+    98    (김동주, 1976-02-03)
+    99     (우즈, 1969-08-19)
+    Length: 100, dtype: object
+
+
+
+
+```python
+player_id = {}
+for i,j in enumerate(info.unique()):
+    player_id[j] = i   
+```
+
+
+```python
+print(player_id)
+```
+
+    {('이종범', '1970-08-15'): 0, ('테임즈', '1986-11-10'): 1, ('심정수', '1975-05-05'): 2, ('이승엽', '1976-08-18'): 3, ('이대호', '1982-06-21'): 4, ('장종훈', '1968-04-10'): 5, ('홍현우', '1972-09-28'): 6, ('양준혁', '1969-05-26'): 7, ('브룸바', '1974-04-21'): 8, ('박경완', '1972-07-11'): 9, ('강정호', '1987-04-05'): 10, ('이병규', '1974-10-25'): 11, ('박석민', '1985-06-22'): 12, ('호세', '1965-06-02'): 13, ('박병호', '1986-07-10'): 14, ('최형우', '1983-12-16'): 15, ('서건창', '1989-08-22'): 16, ('박재홍', '1973-09-07'): 17, ('김재환', '1988-09-22'): 18, ('김동주', '1976-02-03'): 19, ('장효조', '1956-07-06'): 20, ('유지현', '1971-05-25'): 21, ('김기태', '1969-05-23'): 22, ('최정', '1987-02-28'): 23, ('이정훈', '1963-08-28'): 24, ('마해영', '1970-08-14'): 25, ('김현수', '1988-01-12'): 26, ('최익성', '1972-02-11'): 27, ('박건우', '1990-09-08'): 28, ('김태균', '1982-05-29'): 29, ('한대화', '1960-07-08'): 30, ('정근우', '1982-10-02'): 31, ('박정태', '1969-01-27'): 32, ('이만수', '1958-09-19'): 33, ('나바로', '1987-10-31'): 34, ('송지만', '1973-03-02'): 35, ('양의지', '1987-06-05'): 36, ('심재학', '1972-10-18'): 37, ('페르난데스', '1974-11-02'): 38, ('우즈', '1969-08-19'): 39, ('데이비스', '1969-10-03'): 40, ('쿨바', '1966-06-13'): 41, ('홍문종', '1954-11-14'): 42, ('김성래', '1961-03-23'): 43, ('손아섭', '1988-03-18'): 44, ('브리또', '1972-05-28'): 45, ('이순철', '1961-04-18'): 46, ('홍성흔', '1977-02-28'): 47}
+
+
+
+```python
+result['ID'] = result.apply(lambda x: player_id[tuple([x['이름'], x['생일']])], axis=1)
+```
+
+    /var/folders/z2/fv0pqv7s0h14c74jrrz7kv9r0000gn/T/ipykernel_1028/3518108882.py:1: SettingWithCopyWarning: 
+    A value is trying to be set on a copy of a slice from a DataFrame.
+    Try using .loc[row_indexer,col_indexer] = value instead
+    
+    See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+      result['ID'] = result.apply(lambda x: player_id[tuple([x['이름'], x['생일']])], axis=1)
+
+
+
+```python
+result
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>선수</th>
+      <th>G</th>
+      <th>타석</th>
+      <th>타수</th>
+      <th>득점</th>
+      <th>안타</th>
+      <th>2타</th>
+      <th>3타</th>
+      <th>홈런</th>
+      <th>루타</th>
+      <th>...</th>
+      <th>wRC+</th>
+      <th>WAR+</th>
+      <th>생일</th>
+      <th>이름</th>
+      <th>시즌</th>
+      <th>포지션여부</th>
+      <th>포지션</th>
+      <th>팀</th>
+      <th>나이</th>
+      <th>ID</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>해SS</td>
+      <td>124</td>
+      <td>561</td>
+      <td>499</td>
+      <td>113</td>
+      <td>196</td>
+      <td>27</td>
+      <td>5</td>
+      <td>19</td>
+      <td>290</td>
+      <td>...</td>
+      <td>198.3</td>
+      <td>11.77</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1994</td>
+      <td>True</td>
+      <td>SS</td>
+      <td>해</td>
+      <td>25</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>N1B</td>
+      <td>142</td>
+      <td>595</td>
+      <td>472</td>
+      <td>130</td>
+      <td>180</td>
+      <td>42</td>
+      <td>5</td>
+      <td>47</td>
+      <td>373</td>
+      <td>...</td>
+      <td>222.3</td>
+      <td>10.71</td>
+      <td>1986-11-10</td>
+      <td>테임즈</td>
+      <td>2015</td>
+      <td>True</td>
+      <td>1B</td>
+      <td>N</td>
+      <td>30</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>현RF</td>
+      <td>133</td>
+      <td>601</td>
+      <td>460</td>
+      <td>110</td>
+      <td>154</td>
+      <td>16</td>
+      <td>1</td>
+      <td>53</td>
+      <td>331</td>
+      <td>...</td>
+      <td>210.7</td>
+      <td>10.19</td>
+      <td>1975-05-05</td>
+      <td>심정수</td>
+      <td>2003</td>
+      <td>True</td>
+      <td>RF</td>
+      <td>현</td>
+      <td>29</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>해SS</td>
+      <td>125</td>
+      <td>577</td>
+      <td>484</td>
+      <td>112</td>
+      <td>157</td>
+      <td>28</td>
+      <td>3</td>
+      <td>30</td>
+      <td>281</td>
+      <td>...</td>
+      <td>173.2</td>
+      <td>9.70</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1997</td>
+      <td>True</td>
+      <td>SS</td>
+      <td>해</td>
+      <td>28</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>해SS</td>
+      <td>113</td>
+      <td>525</td>
+      <td>449</td>
+      <td>94</td>
+      <td>149</td>
+      <td>28</td>
+      <td>1</td>
+      <td>25</td>
+      <td>254</td>
+      <td>...</td>
+      <td>184.6</td>
+      <td>9.52</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1996</td>
+      <td>True</td>
+      <td>SS</td>
+      <td>해</td>
+      <td>27</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>95</th>
+      <td>한1B</td>
+      <td>126</td>
+      <td>498</td>
+      <td>420</td>
+      <td>77</td>
+      <td>137</td>
+      <td>25</td>
+      <td>4</td>
+      <td>22</td>
+      <td>236</td>
+      <td>...</td>
+      <td>183.1</td>
+      <td>6.14</td>
+      <td>1968-04-10</td>
+      <td>장종훈</td>
+      <td>1995</td>
+      <td>True</td>
+      <td>1B</td>
+      <td>한</td>
+      <td>28</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>96</th>
+      <td>해SS</td>
+      <td>126</td>
+      <td>525</td>
+      <td>475</td>
+      <td>85</td>
+      <td>133</td>
+      <td>16</td>
+      <td>4</td>
+      <td>16</td>
+      <td>205</td>
+      <td>...</td>
+      <td>127.4</td>
+      <td>6.14</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1993</td>
+      <td>True</td>
+      <td>SS</td>
+      <td>해</td>
+      <td>24</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>97</th>
+      <td>한1B</td>
+      <td>115</td>
+      <td>484</td>
+      <td>410</td>
+      <td>81</td>
+      <td>133</td>
+      <td>27</td>
+      <td>1</td>
+      <td>31</td>
+      <td>255</td>
+      <td>...</td>
+      <td>183.4</td>
+      <td>6.14</td>
+      <td>1982-05-29</td>
+      <td>김태균</td>
+      <td>2008</td>
+      <td>True</td>
+      <td>1B</td>
+      <td>한</td>
+      <td>27</td>
+      <td>29</td>
+    </tr>
+    <tr>
+      <th>98</th>
+      <td>두3B</td>
+      <td>120</td>
+      <td>487</td>
+      <td>415</td>
+      <td>63</td>
+      <td>132</td>
+      <td>21</td>
+      <td>0</td>
+      <td>26</td>
+      <td>231</td>
+      <td>...</td>
+      <td>162.7</td>
+      <td>6.13</td>
+      <td>1976-02-03</td>
+      <td>김동주</td>
+      <td>2002</td>
+      <td>True</td>
+      <td>3B</td>
+      <td>두</td>
+      <td>27</td>
+      <td>19</td>
+    </tr>
+    <tr>
+      <th>99</th>
+      <td>두1B</td>
+      <td>127</td>
+      <td>565</td>
+      <td>479</td>
+      <td>91</td>
+      <td>151</td>
+      <td>22</td>
+      <td>0</td>
+      <td>39</td>
+      <td>290</td>
+      <td>...</td>
+      <td>166.6</td>
+      <td>6.12</td>
+      <td>1969-08-19</td>
+      <td>우즈</td>
+      <td>2000</td>
+      <td>True</td>
+      <td>1B</td>
+      <td>두</td>
+      <td>32</td>
+      <td>39</td>
+    </tr>
+  </tbody>
+</table>
+<p>100 rows × 35 columns</p>
+</div>
+
+
+
+
+```python
+result = result.drop(columns=result.columns[0])
+```
+
+
+```python
+result
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>G</th>
+      <th>타석</th>
+      <th>타수</th>
+      <th>득점</th>
+      <th>안타</th>
+      <th>2타</th>
+      <th>3타</th>
+      <th>홈런</th>
+      <th>루타</th>
+      <th>타점</th>
+      <th>...</th>
+      <th>wRC+</th>
+      <th>WAR+</th>
+      <th>생일</th>
+      <th>이름</th>
+      <th>시즌</th>
+      <th>포지션여부</th>
+      <th>포지션</th>
+      <th>팀</th>
+      <th>나이</th>
+      <th>ID</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>124</td>
+      <td>561</td>
+      <td>499</td>
+      <td>113</td>
+      <td>196</td>
+      <td>27</td>
+      <td>5</td>
+      <td>19</td>
+      <td>290</td>
+      <td>77</td>
+      <td>...</td>
+      <td>198.3</td>
+      <td>11.77</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1994</td>
+      <td>True</td>
+      <td>SS</td>
+      <td>해</td>
+      <td>25</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>142</td>
+      <td>595</td>
+      <td>472</td>
+      <td>130</td>
+      <td>180</td>
+      <td>42</td>
+      <td>5</td>
+      <td>47</td>
+      <td>373</td>
+      <td>140</td>
+      <td>...</td>
+      <td>222.3</td>
+      <td>10.71</td>
+      <td>1986-11-10</td>
+      <td>테임즈</td>
+      <td>2015</td>
+      <td>True</td>
+      <td>1B</td>
+      <td>N</td>
+      <td>30</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>133</td>
+      <td>601</td>
+      <td>460</td>
+      <td>110</td>
+      <td>154</td>
+      <td>16</td>
+      <td>1</td>
+      <td>53</td>
+      <td>331</td>
+      <td>142</td>
+      <td>...</td>
+      <td>210.7</td>
+      <td>10.19</td>
+      <td>1975-05-05</td>
+      <td>심정수</td>
+      <td>2003</td>
+      <td>True</td>
+      <td>RF</td>
+      <td>현</td>
+      <td>29</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>125</td>
+      <td>577</td>
+      <td>484</td>
+      <td>112</td>
+      <td>157</td>
+      <td>28</td>
+      <td>3</td>
+      <td>30</td>
+      <td>281</td>
+      <td>74</td>
+      <td>...</td>
+      <td>173.2</td>
+      <td>9.70</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1997</td>
+      <td>True</td>
+      <td>SS</td>
+      <td>해</td>
+      <td>28</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>113</td>
+      <td>525</td>
+      <td>449</td>
+      <td>94</td>
+      <td>149</td>
+      <td>28</td>
+      <td>1</td>
+      <td>25</td>
+      <td>254</td>
+      <td>76</td>
+      <td>...</td>
+      <td>184.6</td>
+      <td>9.52</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1996</td>
+      <td>True</td>
+      <td>SS</td>
+      <td>해</td>
+      <td>27</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>95</th>
+      <td>126</td>
+      <td>498</td>
+      <td>420</td>
+      <td>77</td>
+      <td>137</td>
+      <td>25</td>
+      <td>4</td>
+      <td>22</td>
+      <td>236</td>
+      <td>78</td>
+      <td>...</td>
+      <td>183.1</td>
+      <td>6.14</td>
+      <td>1968-04-10</td>
+      <td>장종훈</td>
+      <td>1995</td>
+      <td>True</td>
+      <td>1B</td>
+      <td>한</td>
+      <td>28</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>96</th>
+      <td>126</td>
+      <td>525</td>
+      <td>475</td>
+      <td>85</td>
+      <td>133</td>
+      <td>16</td>
+      <td>4</td>
+      <td>16</td>
+      <td>205</td>
+      <td>53</td>
+      <td>...</td>
+      <td>127.4</td>
+      <td>6.14</td>
+      <td>1970-08-15</td>
+      <td>이종범</td>
+      <td>1993</td>
+      <td>True</td>
+      <td>SS</td>
+      <td>해</td>
+      <td>24</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>97</th>
+      <td>115</td>
+      <td>484</td>
+      <td>410</td>
+      <td>81</td>
+      <td>133</td>
+      <td>27</td>
+      <td>1</td>
+      <td>31</td>
+      <td>255</td>
+      <td>92</td>
+      <td>...</td>
+      <td>183.4</td>
+      <td>6.14</td>
+      <td>1982-05-29</td>
+      <td>김태균</td>
+      <td>2008</td>
+      <td>True</td>
+      <td>1B</td>
+      <td>한</td>
+      <td>27</td>
+      <td>29</td>
+    </tr>
+    <tr>
+      <th>98</th>
+      <td>120</td>
+      <td>487</td>
+      <td>415</td>
+      <td>63</td>
+      <td>132</td>
+      <td>21</td>
+      <td>0</td>
+      <td>26</td>
+      <td>231</td>
+      <td>79</td>
+      <td>...</td>
+      <td>162.7</td>
+      <td>6.13</td>
+      <td>1976-02-03</td>
+      <td>김동주</td>
+      <td>2002</td>
+      <td>True</td>
+      <td>3B</td>
+      <td>두</td>
+      <td>27</td>
+      <td>19</td>
+    </tr>
+    <tr>
+      <th>99</th>
+      <td>127</td>
+      <td>565</td>
+      <td>479</td>
+      <td>91</td>
+      <td>151</td>
+      <td>22</td>
+      <td>0</td>
+      <td>39</td>
+      <td>290</td>
+      <td>111</td>
+      <td>...</td>
+      <td>166.6</td>
+      <td>6.12</td>
+      <td>1969-08-19</td>
+      <td>우즈</td>
+      <td>2000</td>
+      <td>True</td>
+      <td>1B</td>
+      <td>두</td>
+      <td>32</td>
+      <td>39</td>
+    </tr>
+  </tbody>
+</table>
+<p>100 rows × 34 columns</p>
+</div>
+
+
+
+
+```python
+float_columns = result.iloc[:,1:27].columns
+```
+
+
+```python
+float_columns
+```
+
+
+
+
+    Index(['타석', '타수', '득점', '안타', '2타', '3타', '홈런', '루타', '타점', '도루', '도실', '볼넷',
+           '사구', '고4', '삼진', '병살', '희타', '희비', '타율', '출루', '장타', 'OPS', 'wOBA',
+           'wRC+', 'WAR+', '생일'],
+          dtype='object')
+
+
+
+
+```python
+cols = ['ID','이름','생일','팀','시즌','포지션','나이'] + list(float_columns)
+result = result[cols]
+```
+
+
+```python
+result
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>ID</th>
+      <th>이름</th>
+      <th>생일</th>
+      <th>팀</th>
+      <th>시즌</th>
+      <th>포지션</th>
+      <th>나이</th>
+      <th>타석</th>
+      <th>타수</th>
+      <th>득점</th>
+      <th>...</th>
+      <th>희타</th>
+      <th>희비</th>
+      <th>타율</th>
+      <th>출루</th>
+      <th>장타</th>
+      <th>OPS</th>
+      <th>wOBA</th>
+      <th>wRC+</th>
+      <th>WAR+</th>
+      <th>생일</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0</td>
+      <td>이종범</td>
+      <td>1970-08-15</td>
+      <td>해</td>
+      <td>1994</td>
+      <td>SS</td>
+      <td>25</td>
+      <td>561</td>
+      <td>499</td>
+      <td>113</td>
+      <td>...</td>
+      <td>1</td>
+      <td>4</td>
+      <td>.393</td>
+      <td>.452</td>
+      <td>.581</td>
+      <td>1.033</td>
+      <td>.462</td>
+      <td>198.3</td>
+      <td>11.77</td>
+      <td>1970-08-15</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1</td>
+      <td>테임즈</td>
+      <td>1986-11-10</td>
+      <td>N</td>
+      <td>2015</td>
+      <td>1B</td>
+      <td>30</td>
+      <td>595</td>
+      <td>472</td>
+      <td>130</td>
+      <td>...</td>
+      <td>0</td>
+      <td>7</td>
+      <td>.381</td>
+      <td>.498</td>
+      <td>.790</td>
+      <td>1.288</td>
+      <td>.530</td>
+      <td>222.3</td>
+      <td>10.71</td>
+      <td>1986-11-10</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2</td>
+      <td>심정수</td>
+      <td>1975-05-05</td>
+      <td>현</td>
+      <td>2003</td>
+      <td>RF</td>
+      <td>29</td>
+      <td>601</td>
+      <td>460</td>
+      <td>110</td>
+      <td>...</td>
+      <td>0</td>
+      <td>8</td>
+      <td>.335</td>
+      <td>.478</td>
+      <td>.720</td>
+      <td>1.197</td>
+      <td>.498</td>
+      <td>210.7</td>
+      <td>10.19</td>
+      <td>1975-05-05</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0</td>
+      <td>이종범</td>
+      <td>1970-08-15</td>
+      <td>해</td>
+      <td>1997</td>
+      <td>SS</td>
+      <td>28</td>
+      <td>577</td>
+      <td>484</td>
+      <td>112</td>
+      <td>...</td>
+      <td>0</td>
+      <td>3</td>
+      <td>.324</td>
+      <td>.428</td>
+      <td>.581</td>
+      <td>1.009</td>
+      <td>.431</td>
+      <td>173.2</td>
+      <td>9.70</td>
+      <td>1970-08-15</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0</td>
+      <td>이종범</td>
+      <td>1970-08-15</td>
+      <td>해</td>
+      <td>1996</td>
+      <td>SS</td>
+      <td>27</td>
+      <td>525</td>
+      <td>449</td>
+      <td>94</td>
+      <td>...</td>
+      <td>0</td>
+      <td>2</td>
+      <td>.332</td>
+      <td>.425</td>
+      <td>.566</td>
+      <td>.991</td>
+      <td>.440</td>
+      <td>184.6</td>
+      <td>9.52</td>
+      <td>1970-08-15</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>95</th>
+      <td>5</td>
+      <td>장종훈</td>
+      <td>1968-04-10</td>
+      <td>한</td>
+      <td>1995</td>
+      <td>1B</td>
+      <td>28</td>
+      <td>498</td>
+      <td>420</td>
+      <td>77</td>
+      <td>...</td>
+      <td>0</td>
+      <td>4</td>
+      <td>.326</td>
+      <td>.424</td>
+      <td>.562</td>
+      <td>.986</td>
+      <td>.431</td>
+      <td>183.1</td>
+      <td>6.14</td>
+      <td>1968-04-10</td>
+    </tr>
+    <tr>
+      <th>96</th>
+      <td>0</td>
+      <td>이종범</td>
+      <td>1970-08-15</td>
+      <td>해</td>
+      <td>1993</td>
+      <td>SS</td>
+      <td>24</td>
+      <td>525</td>
+      <td>475</td>
+      <td>85</td>
+      <td>...</td>
+      <td>8</td>
+      <td>4</td>
+      <td>.280</td>
+      <td>.331</td>
+      <td>.432</td>
+      <td>.762</td>
+      <td>.350</td>
+      <td>127.4</td>
+      <td>6.14</td>
+      <td>1970-08-15</td>
+    </tr>
+    <tr>
+      <th>97</th>
+      <td>29</td>
+      <td>김태균</td>
+      <td>1982-05-29</td>
+      <td>한</td>
+      <td>2008</td>
+      <td>1B</td>
+      <td>27</td>
+      <td>484</td>
+      <td>410</td>
+      <td>81</td>
+      <td>...</td>
+      <td>0</td>
+      <td>5</td>
+      <td>.324</td>
+      <td>.417</td>
+      <td>.622</td>
+      <td>1.039</td>
+      <td>.461</td>
+      <td>183.4</td>
+      <td>6.14</td>
+      <td>1982-05-29</td>
+    </tr>
+    <tr>
+      <th>98</th>
+      <td>19</td>
+      <td>김동주</td>
+      <td>1976-02-03</td>
+      <td>두</td>
+      <td>2002</td>
+      <td>3B</td>
+      <td>27</td>
+      <td>487</td>
+      <td>415</td>
+      <td>63</td>
+      <td>...</td>
+      <td>0</td>
+      <td>7</td>
+      <td>.318</td>
+      <td>.405</td>
+      <td>.557</td>
+      <td>.961</td>
+      <td>.415</td>
+      <td>162.7</td>
+      <td>6.13</td>
+      <td>1976-02-03</td>
+    </tr>
+    <tr>
+      <th>99</th>
+      <td>39</td>
+      <td>우즈</td>
+      <td>1969-08-19</td>
+      <td>두</td>
+      <td>2000</td>
+      <td>1B</td>
+      <td>32</td>
+      <td>565</td>
+      <td>479</td>
+      <td>91</td>
+      <td>...</td>
+      <td>0</td>
+      <td>3</td>
+      <td>.315</td>
+      <td>.414</td>
+      <td>.605</td>
+      <td>1.020</td>
+      <td>.437</td>
+      <td>166.6</td>
+      <td>6.12</td>
+      <td>1969-08-19</td>
+    </tr>
+  </tbody>
+</table>
+<p>100 rows × 33 columns</p>
+</div>
+
+
+
+
+```python
+print("<전체 column 타입확인>\n\n",result.dtypes.value_counts())
+print()
+print("<object type columns>\n\n",result.columns[result.dtypes=='object'])
+
+```
+
+    <전체 column 타입확인>
+    
+     object    30
+    int64      3
+    dtype: int64
+    
+    <object type columns>
+    
+     Index(['이름', '생일', '팀', '포지션', '타석', '타수', '득점', '안타', '2타', '3타', '홈런', '루타',
+           '타점', '도루', '도실', '볼넷', '사구', '고4', '삼진', '병살', '희타', '희비', '타율', '출루',
+           '장타', 'OPS', 'wOBA', 'wRC+', 'WAR+', '생일'],
+          dtype='object')
+
+
+
+```python
+result.loc[:, 'OPS'] = result['OPS'].astype(float)
+result.loc[:, '타수'] = result['타수'].astype(float)
+result.loc[:, '안타'] = result['안타'].astype(float)
+result.loc[:, '타석'] = result['타석'].astype(float)
+result.loc[:, '루타'] = result['루타'].astype(float)
+result.loc[:, 'wRC+'] = result['wRC+'].astype(float)
+
+```
+
+    /var/folders/z2/fv0pqv7s0h14c74jrrz7kv9r0000gn/T/ipykernel_1028/933187240.py:1: SettingWithCopyWarning: 
+    A value is trying to be set on a copy of a slice from a DataFrame.
+    Try using .loc[row_indexer,col_indexer] = value instead
+    
+    See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+      result.loc[:, 'OPS'] = result['OPS'].astype(float)
+    /var/folders/z2/fv0pqv7s0h14c74jrrz7kv9r0000gn/T/ipykernel_1028/933187240.py:2: SettingWithCopyWarning: 
+    A value is trying to be set on a copy of a slice from a DataFrame.
+    Try using .loc[row_indexer,col_indexer] = value instead
+    
+    See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+      result.loc[:, '타수'] = result['타수'].astype(float)
+    /var/folders/z2/fv0pqv7s0h14c74jrrz7kv9r0000gn/T/ipykernel_1028/933187240.py:3: SettingWithCopyWarning: 
+    A value is trying to be set on a copy of a slice from a DataFrame.
+    Try using .loc[row_indexer,col_indexer] = value instead
+    
+    See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+      result.loc[:, '안타'] = result['안타'].astype(float)
+    /var/folders/z2/fv0pqv7s0h14c74jrrz7kv9r0000gn/T/ipykernel_1028/933187240.py:4: SettingWithCopyWarning: 
+    A value is trying to be set on a copy of a slice from a DataFrame.
+    Try using .loc[row_indexer,col_indexer] = value instead
+    
+    See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+      result.loc[:, '타석'] = result['타석'].astype(float)
+    /var/folders/z2/fv0pqv7s0h14c74jrrz7kv9r0000gn/T/ipykernel_1028/933187240.py:5: SettingWithCopyWarning: 
+    A value is trying to be set on a copy of a slice from a DataFrame.
+    Try using .loc[row_indexer,col_indexer] = value instead
+    
+    See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+      result.loc[:, '루타'] = result['루타'].astype(float)
+    /var/folders/z2/fv0pqv7s0h14c74jrrz7kv9r0000gn/T/ipykernel_1028/933187240.py:6: SettingWithCopyWarning: 
+    A value is trying to be set on a copy of a slice from a DataFrame.
+    Try using .loc[row_indexer,col_indexer] = value instead
+    
+    See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+      result.loc[:, 'wRC+'] = result['wRC+'].astype(float)
+
+
+
+```python
+correlations = result.corr()['OPS'].sort_values()
+```
+
+
+```python
+print('Most Positive Correlations:\n', correlations.tail(11))
+print('\nMost Negative Correlations:\n', correlations.head(10))
+```
+
+    Most Positive Correlations:
+     ID     -0.331879
+    타수     -0.105395
+    타석      0.075105
+    안타      0.138323
+    나이      0.192230
+    시즌      0.252891
+    루타      0.591758
+    wRC+    0.708587
+    OPS     1.000000
+    Name: OPS, dtype: float64
+    
+    Most Negative Correlations:
+     ID     -0.331879
+    타수     -0.105395
+    타석      0.075105
+    안타      0.138323
+    나이      0.192230
+    시즌      0.252891
+    루타      0.591758
+    wRC+    0.708587
+    OPS     1.000000
+    Name: OPS, dtype: float64
+
+
+
+```python
+
+```
