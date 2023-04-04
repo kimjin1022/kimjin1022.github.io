@@ -17,15 +17,15 @@ minimal_mistakes_skin    : "mint" # "air", "aqua", "contrast", "dark", "dirt", "
 # Site Settings
 locale                   : "ko-KR"
 title                    : "DATA_Study"
-title_separator          : "|"
+title_separator          : "|" # 포스팅한 글에 들어가서 url을 확인해보면 | 로 나누어짐
 subtitle                 : "Down Team is Down"
-name                     : "JIN"
+name                     : "JIN" #최하단 이름 표시
 description              : "데이터 분석 공부를 하고 있는 학생입니다"
 url                      : "https://kimjin1022.github.io"
 baseurl                  : # the subpath of your site, e.g. "/blog"
 repository               : # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
 teaser                   : # path of fallback teaser image, e.g. "/assets/images/500x300.png"
-logo                     : # path of logo image to display in the masthead, e.g. "/assets/images/88x88.png"
+logo                     : "/images/다운로드.png"
 masthead_title           : # overrides the website title displayed in the masthead, use " " for no title
 # breadcrumbs            : false # true, false (default)
 words_per_minute         : 200
@@ -108,7 +108,7 @@ author:
   avatar           : # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
   bio              : "데이터 분석 공부를 하고 있는 학생입니다."
   location         : "Republic of Korea"
-  email            :
+  email            : "jinjinjara1022@naver.com"
   links:
     - label: "Email"
       icon: "fas fa-fw fa-envelope-square"
