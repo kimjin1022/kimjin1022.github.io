@@ -106,7 +106,7 @@ analytics:
 author:
   name             : "Kim Jin"
   avatar           : # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio              : "Down Team is Down."
+  bio              : "데이터 분석 공부를 하고 있는 학생입니다."
   location         : "Republic of Korea"
   email            :
   links:
